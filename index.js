@@ -4,7 +4,6 @@
 // set up ========================
 var utility = require('./utility');
 var email = require('./email');
-var livereload = require('express-livereload');
 var express  = require('express');
 var app      = express();                               // create our app w/ express
 var morgan = require('morgan');             // log requests to the console (express4)
@@ -12,7 +11,7 @@ var bodyParser = require('body-parser');    // pull information from HTML POST (
 var methodOverride = require('method-override'); // simulate DELETE and PUT (express4)
 var path = require('path');
 var relativeAppPath = path.resolve('../viLogged-Client/app/');
-var PORT = 9090;
+var PORT = 9000;
 
 // configuration =================
 
@@ -82,8 +81,6 @@ app.post('/api/save-settings', function(req, res) {
     res.json({message: 'unable to save settings'});
   }
 });
-
-livereload(app, config={watchDir: relativeAppPath});
 
 app.listen(PORT);
 console.log("App listening on port "+PORT);
