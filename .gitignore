@@ -1,0 +1,7 @@
+node_modules
+docs/
+json/
+public
+.tmp
+.idea/
+config/config.json
