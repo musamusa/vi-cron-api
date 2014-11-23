@@ -4,6 +4,7 @@
 // set up ========================
 var utility = require('./utility');
 var email = require('./email');
+var sms = require('./beta-sms');
 var express  = require('express');
 var app      = express();                               // create our app w/ express
 var morgan = require('morgan');             // log requests to the console (express4)
@@ -24,10 +25,6 @@ app.use(methodOverride());
 
 // listen (start app with node server.js) ======================================
 
-app.get('/api/todos', function(req, res) {
-  res.json({message: 'nothing to see here; check again'});
-});
-
 app.post('/api/send-mail', function(req, res) {
   var option ={
     to: req.body.to,
@@ -39,6 +36,23 @@ app.post('/api/send-mail', function(req, res) {
       res.json({message: 'mail was sent successfully'});
     })
     .catch(function(reason) {
+      res.statusCode(500);
+      res.json(reason);
+    });
+});
+
+app.post('/api/send-sms', function(req, res) {
+  var option ={
+    mobiles: req.body.mobiles,
+    message: req.body.message
+  };
+
+  sms.sendSMS(option)
+    .then(function() {
+      res.json({message: 'sms was sent successfully'});
+    })
+    .catch(function(reason) {
+      res.statusCode(500);
       res.json(reason);
     });
 });
