@@ -138,10 +138,15 @@ function _http(params, callback) {
       agent: false
     };
     if (postData !== '') {
-      options.headers = {
-        'Content-Type': 'application/json',
-        'Content-Length': postData.length
-      };
+      if (params.headers) {
+        options.headers = params.headers
+      } else {
+        options.headers = {
+          'Content-Type': 'application/json',
+          'Content-Length': postData.length
+        };
+      }
+
     }
     if (params.auth != undefined) {
       options.auth = params.auth;
