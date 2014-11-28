@@ -1,6 +1,5 @@
 // call the packages we need
 // server.js
-
 // set up ========================
 var utility = require('./utility');
 var email = require('./email');
@@ -88,6 +87,7 @@ app.post('/api/save-settings', function(req, res) {
         }
       });
   }*/
+
   if (utility.storeData(JSON.stringify(settings), settings_file)) {
     res.json({message: 'settings saved'});
   } else {
@@ -98,3 +98,4 @@ app.post('/api/save-settings', function(req, res) {
 
 app.listen(PORT);
 console.log("App listening on port "+PORT);
+

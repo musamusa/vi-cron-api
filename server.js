@@ -3,7 +3,11 @@ var Service = require('node-windows').Service;
 var svc = new Service({
     name:'viLogged Core',
     description: 'viLogged Visitor Management System',
-    script: 'index.js'
+    script: 'index.js',
+    env: {
+        name: "HOME",
+        value: process.env["USERPROFILE"] // service is now able to access the user who created its' home directory
+    }
 });
 
 // Listen for the "install" event, which indicates the
