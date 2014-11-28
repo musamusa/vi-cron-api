@@ -12,7 +12,7 @@ var bodyParser = require('body-parser');    // pull information from HTML POST (
 var methodOverride = require('method-override'); // simulate DELETE and PUT (express4)
 var path = require('path');
 var relativeAppPath = path.resolve('../viLogged-Client/app/');
-var PORT = 9000;
+var PORT = 8088;
 
 // configuration =================
 

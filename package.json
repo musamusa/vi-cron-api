@@ -2,7 +2,6 @@
   "name": "vi-logged-cron",
   "version": "0.0.1",
   "dependencies": {
-    "barc": "0.0.4",
     "body-parser": "^1.9.2",
     "canvas": "^1.1.6",
     "express": "^4.10.2",
@@ -13,7 +12,6 @@
     "nodemailer": "^1.3.0",
     "nodemailer-smtp-transport": "^0.1.13",
     "npm": "^2.1.7",
-    "q": "^1.1.1",
-    "usb": "^0.3.11"
+    "q": "^1.1.1"
   }
 }
