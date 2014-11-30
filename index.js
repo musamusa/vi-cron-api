@@ -1,18 +1,18 @@
 // call the packages we need
 // server.js
-
 // set up ========================
 var utility = require('./utility');
 var email = require('./email');
 var sms = require('./beta-sms');
+var cors = require('cors');
 var express  = require('express');
 var app      = express();                               // create our app w/ express
 var morgan = require('morgan');             // log requests to the console (express4)
 var bodyParser = require('body-parser');    // pull information from HTML POST (express4)
 var methodOverride = require('method-override'); // simulate DELETE and PUT (express4)
 var path = require('path');
-var relativeAppPath = path.resolve('../viLogged-Client/app/');
-var PORT = 9000;
+var relativeAppPath = path.resolve('viLogged-Client/dist');
+var PORT = 8088;
 
 // configuration =================
 
@@ -22,6 +22,8 @@ app.use(bodyParser.urlencoded({'extended':'true'}));            // parse applica
 app.use(bodyParser.json());                                     // parse application/json
 app.use(bodyParser.json({ type: 'application/vnd.api+json' })); // parse application/vnd.api+json as json
 app.use(methodOverride());
+
+app.use(cors());
 
 // listen (start app with node server.js) ======================================
 
@@ -57,7 +59,20 @@ app.post('/api/send-sms', function(req, res) {
     });
 });
 
-app.get('/api/save-settings', function(req, res) {
+app.post('/api/app-config', function(req, res) {
+  var settingFile = utility.ROOT_DIR+'/viLogged-Client/app/scripts/config.json';
+  var appConfig = req.body.localSetting;
+  var api = {api: appConfig};
+  if (utility.storeData(JSON.stringify(api), settingFile)) {
+    res.json(api);
+  } else {
+    res.statusCode(500);
+    res.json({reason: 'cannot save data'});
+  }
+});
+
+
+app.get('/api/settings', function(req, res) {
   var settings_file = utility.JSON_DIR+'/settings.json';
   var settings = {};
   if (utility.fileExists(settings_file)) {
@@ -66,7 +81,7 @@ app.get('/api/save-settings', function(req, res) {
   res.json(settings);
 });
 
-app.post('/api/save-settings', function(req, res) {
+app.post('/api/settings', function(req, res) {
   var settings_file = utility.JSON_DIR+'/settings.json';
   var settings = req.body;
   /*if (utility.fileExists(settings)) {
@@ -88,6 +103,7 @@ app.post('/api/save-settings', function(req, res) {
         }
       });
   }*/
+
   if (utility.storeData(JSON.stringify(settings), settings_file)) {
     res.json({message: 'settings saved'});
   } else {
@@ -98,3 +114,4 @@ app.post('/api/save-settings', function(req, res) {
 
 app.listen(PORT);
 console.log("App listening on port "+PORT);
+

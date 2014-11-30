@@ -8,6 +8,8 @@ var LOCAL_ADDRESS = 'http://localhost';
 var HOST_ADDRESS = LOCAL_ADDRESS;
 var DOC_DIR = path.join(ROOT_DIR, 'docs');
 var JSON_DIR = path.join(ROOT_DIR, 'json');
+var mkdirp = require('mkdirp');
+var Q = require('q');
 
 function castArrayToObject(array, key, callback){
   var newObject = {};
@@ -50,6 +52,18 @@ var uuidGenerator = function() {
 var fileExists = function(fileName) {
   return fs.existsSync(fileName);
 };
+
+function dirExistsSync(d) {
+  try {
+    return fs.statSync(d).isDirectory();
+  } catch (er) {
+    return false
+  }
+}
+
+function mkdir(dir) {
+  return mkdirp.sync(dir);
+}
 
 var storeData = function(data, fileName) {
   var saved = fs.writeFileSync(fileName, data);
@@ -122,6 +136,7 @@ var removeExtension = function(fileName) {
 
 
 function _http(params, callback) {
+  var deferred = Q.defer();
   params = params !== undefined ? params : {};
   var postData = params.data != undefined ? params.data : '';
   var _ADDRESS = params._address !== undefined ? params._address : '127.0.0.1';
@@ -153,6 +168,7 @@ function _http(params, callback) {
     }
 
     var req = http.request(options, function(response) {
+
       var str = '';
       response.on('data', function (chunk) {
         str += chunk;
@@ -161,25 +177,49 @@ function _http(params, callback) {
       response.on('end', function () {
         if (callback !== undefined) {
           var responseData = {};
-          var jsonResp = JSON.parse(str);
+          var jsonResp = str;
           if (jsonResp.error !== undefined) {
             responseData.status = false;
             responseData.reason = jsonResp.reason;
             responseData.response = str;
+
           } else {
             responseData.status = true;
             responseData.response = str;
+
           }
 
           callback(responseData);
-
-        } else {
-          console.log(str);
         }
+        var status = parseInt(response.statusCode.toString().charAt(0));
+        if ([4, 5].indexOf(status) !== -1) {
+          deferred.reject({
+            status: false,
+            statusCode: response.statusCode,
+            data: str,
+            reason: http.STATUS_CODES[response.statusCode],
+            response: response
+
+          });
+        } else {
+          deferred.resolve({
+            status: true,
+            statusCode: response.statusCode,
+            data: str,
+            response: response
+          });
+        }
+
       });
 
       response.on('error', function(error) {
-        console.error('from error',error);
+        deferred.reject({
+          status: false,
+          statusCode: null,
+          data: null,
+          reason: error,
+          response: response
+        });
       });
 
       response.on('complete', function(msg) {
@@ -187,12 +227,21 @@ function _http(params, callback) {
       });
     });
 //This is the data we are posting, it needs to be a string or a buffer
-    req.write(postData);
+    if (postData) {
+      req.write(postData);
+    }
     req.end();
   } else {
     callback('Please enter a valid path');
+    deferred.reject({
+      status: false,
+      statusCode: null,
+      data: null,
+      reason: 'Please enter a valid path',
+      response: {}
+    });
   }
-
+  return deferred.promise;
 }
 
 function toTitleCase(str) {
@@ -211,6 +260,8 @@ function toCamelCase(str) {
 }
 
 function post(params, callback) {
+  params = params !== undefined ? params : {};
+  params.method = 'POST';
   return _http(params, callback);
 }
 
@@ -222,7 +273,7 @@ function remove(params, callback) {
 
 function get(params, callback) {
   params = params !== undefined ? params : {};
-  params.method = params.method !== undefined ? params.method : 'GET';
+  params.method = 'GET';
   return _http(params, callback);
 }
 
@@ -284,6 +335,7 @@ var moduleHelper = {
   storeData: storeData,
   readAllInDir: readAllInDir,
   loadFile: loadFile,
+  http: http,
   post: post,
   getAll: getAll,
   get: get,
@@ -299,7 +351,9 @@ var moduleHelper = {
   uniqueCheck: uniqueCheck,
   appendMultipleErrors: appendMultipleErrors,
   generatePassword: generatePassword,
-  toCamelCase: toCamelCase
+  toCamelCase: toCamelCase,
+  mkDir: mkdir,
+  dirExists: dirExistsSync
 };
 
 module.exports = moduleHelper;
