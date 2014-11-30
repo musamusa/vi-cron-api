@@ -15,8 +15,7 @@ function getSetting() {
 
 function checkUpdate() {
   var deferred = Q.defer();
-  var version = getSetting().version;;
-
+  var version = getSetting().version;
   var params = {
     _address: 'dev.musamusa.com',
     path: '/vilogged-updates/versions.json',
@@ -24,7 +23,7 @@ function checkUpdate() {
   };
   utility.get(params)
     .then(function(response) {
-      var returnData = Object.prototype.toString.call(response) === '[object String]' ? JSON.parse(response) : response;
+      var returnData = Object.prototype.toString.call(response.data) === '[object String]' ? JSON.parse(response.data) : response.data;
       returnData.updateRequired = returnData.current > version;
       deferred.resolve(returnData);
     })
@@ -59,7 +58,7 @@ function getUpdate(_version) {
 }
 
 function loadUpdate(_version) {
-
+  var deferred = Q.defer();
   var version = _version.replace(/\./, '-');
   var fileName = utility.ROOT_DIR+'/vilogged-'+version+'.zip';
 
@@ -67,10 +66,12 @@ function loadUpdate(_version) {
   var unzipper = new DecompressZip(fileName);
 
   unzipper.on('error', function (err) {
-    console.log('Caught an error', err);
+    deferred.reject(err);
+    console.log( err);
   });
 
   unzipper.on('extract', function (log) {
+    deferred.resolve(log);
     console.log('Finished extracting', log);
   });
 
@@ -82,4 +83,46 @@ function loadUpdate(_version) {
   });
 
 }
-loadUpdate('1.0.2');
+ function manageUpdates() {
+   var busy = false;
+
+   setInterval(function() {
+     if (!busy) {
+       busy = true;
+       checkUpdate()
+         .then(function(response) {
+           if (response.updateRequired) {
+             var version = response.current;
+             getUpdate(version)
+               .then(function(response) {
+                 loadUpdate(version)
+                   .then(function(response) {
+
+                   })
+                   .catch(function(reason) {
+                     busy = false;
+                   });
+               })
+               .catch(function(reason) {
+                 console.log(reason);
+                 busy = false;
+               });
+           } else {
+             console.log('no update');
+             busy = false;
+           }
+         })
+         .catch(function(reason) {
+           console.log(reason);
+           busy = false;
+         });
+     } else {
+       console.log('busy');
+     }
+
+
+   }, 10000);
+
+ }
+
+module.exports = manageUpdates;
