@@ -3,7 +3,8 @@
 var utility = require('./utility');
 var SETTINGS_FILE = 'system.json';
 var Q = require('q');
-
+var runScript = require('./run-script');
+var path = require('path');
 
 function getSetting() {
   var settings = {};
@@ -97,6 +98,18 @@ function loadUpdate(_version) {
                .then(function(response) {
                  loadUpdate(version)
                    .then(function(response) {
+                     var sys = require('sys');
+                     var exec = require('child_process').exec;
+                     var child;
+
+                      // executes `pwd`
+                     child = exec("cmd.exe make-update.bat", function (error, stdout, stderr) {
+                       sys.print('stdout: ' + stdout);
+                       sys.print('stderr: ' + stderr);
+                       if (error !== null) {
+                         console.log('exec error: ' + error);
+                       }
+                     });
 
                    })
                    .catch(function(reason) {
@@ -121,7 +134,7 @@ function loadUpdate(_version) {
      }
 
 
-   }, 10000);
+   }, 60000 * 60);
 
  }
 
