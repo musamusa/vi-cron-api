@@ -11,6 +11,7 @@ var morgan = require('morgan');             // log requests to the console (expr
 var bodyParser = require('body-parser');    // pull information from HTML POST (express4)
 var methodOverride = require('method-override'); // simulate DELETE and PUT (express4)
 var path = require('path');
+var updateManager = require('./update-manager');
 var relativeAppPath = path.resolve('viLogged-Client/dist');
 var PORT = 8088;
 
@@ -60,7 +61,13 @@ app.post('/api/send-sms', function(req, res) {
 });
 
 app.post('/api/app-config', function(req, res) {
-  var settingFile = utility.ROOT_DIR+'/viLogged-Client/app/scripts/config.json';
+  var settingFile = utility.ROOT_DIR+'/viLogged-Client/app/scripts/config.js';
+  var settingFile2 = utility.ROOT_DIR+'/viLogged-Client/dist/scripts/config.js';
+
+  if (!utility.fileExists(settingFile)) {
+    settingFile = settingFile2;
+  }
+
   var appConfig = req.body.localSetting;
   var api = {api: appConfig};
   if (utility.storeData(JSON.stringify(api), settingFile)) {
@@ -84,25 +91,6 @@ app.get('/api/settings', function(req, res) {
 app.post('/api/settings', function(req, res) {
   var settings_file = utility.JSON_DIR+'/settings.json';
   var settings = req.body;
-  /*if (utility.fileExists(settings)) {
-    settings = JSON.parse(utility.loadFile());
-  }
-  var settings_type = req.body.settings_type;
-
-  if (settings[settings_type]) {
-    Object.keys(settings[settings_type])
-      .forEach(function(key) {
-        settings[settings_type][key] = req.body[key];
-      });
-  } else {
-    settings[settings_type] = {};
-    Object.keys(req.body)
-      .forEach(function(key) {
-        if (key !== settings_type) {
-          settings[settings_type][key] = req.body[key];
-        }
-      });
-  }*/
 
   if (utility.storeData(JSON.stringify(settings), settings_file)) {
     res.json({message: 'settings saved'});
@@ -112,6 +100,9 @@ app.post('/api/settings', function(req, res) {
   }
 });
 
+
+
 app.listen(PORT);
+updateManager();
 console.log("App listening on port "+PORT);
 
