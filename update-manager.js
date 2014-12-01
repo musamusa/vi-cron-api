@@ -3,7 +3,7 @@
 var utility = require('./utility');
 var SETTINGS_FILE = 'system.json';
 var Q = require('q');
-var runScript = require('./run-script');
+//var runScript = require('./run-script');
 var path = require('path');
 
 function getSetting() {
