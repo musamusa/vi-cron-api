@@ -1,27 +1,54 @@
 'use strict';
 
 var utility = require('./utility');
-var SETTINGS_FILE = 'system.json';
+var setting = require('./system-manager');
 var Q = require('q');
-//var runScript = require('./run-script');
 var path = require('path');
+var url = require('url');
 
-function getSetting() {
-  var settings = {};
-  if (utility.fileExists(SETTINGS_FILE)) {
-    settings = require('./'+SETTINGS_FILE);
-  }
-  return settings;
-}
+function updatePollParams(systemSetting) {
 
-function checkUpdate() {
-  var deferred = Q.defer();
-  var version = getSetting().version;
   var params = {
     _address: 'dev.musamusa.com',
     path: '/vilogged-updates/versions.json',
     port: 1979
   };
+
+  if (systemSetting.system === 'client') {
+    var pollUrl = url.parse(systemSetting.client.backend);
+    params._address = pollUrl.hostname;
+    params.path = '/api/versions';
+    params.port = 8088;
+  }
+
+  return params;
+}
+
+function updateDownloadParams(systemSetting) {
+
+  var params = {
+    _address: 'dev.musamusa.com',
+    path: '/vilogged-updates/versions.json',
+    port: 1979
+  };
+
+  if (systemSetting.system === 'client') {
+    var pollUrl = url.parse(systemSetting.client.backend);
+    params._address = pollUrl.hostname;
+    params.path = '/api/versions';
+    params.port = 8088;
+  }
+
+  return params;
+}
+
+function checkUpdate() {
+  var deferred = Q.defer();
+  var systemSetting = setting.getSetting();
+  var version = systemSetting.version;
+
+  var params = updatePollParams(systemSetting);
+
   utility.get(params)
     .then(function(response) {
       var returnData = Object.prototype.toString.call(response.data) === '[object String]' ? JSON.parse(response.data) : response.data;
@@ -38,15 +65,20 @@ function checkUpdate() {
 function getUpdate(_version) {
   var deferred = Q.defer();
 
+  var systemSetting = setting.getSetting();
+
+
   var version = _version.replace(/\./, '-');
   var fileName = 'vilogged-'+version+'.zip';
   var file = utility.fs.createWriteStream(fileName);
-  var params = {
-    _address: 'dev.musamusa.com',
-    path: '/vilogged-updates/'+fileName,
-    port: 1979
-  };
-  utility.http.get('http://dev.musamusa.com:1979/vilogged-updates/'+fileName, function(response) {
+
+  var downloadUrl = 'http://dev.musamusa.com:1979/vilogged-updates/'+fileName;
+  if (systemSetting.system === 'client') {
+    var pollUrl = url.parse(systemSetting.client.backend);
+    downloadUrl = pollUrl.protocol + '//' + pollUrl.hostname + ':8088/api/get-update-file?version='+_version;
+  }
+
+  utility.http.get(downloadUrl, function(response) {
     var status = parseInt(response.statusCode.toString().charAt(0));
     if ([4, 5].indexOf(status) !== -1) {
       deferred.reject(response);
@@ -84,6 +116,15 @@ function loadUpdate(_version) {
   });
 
 }
+
+function updateSystemVersion(_version) {
+  var settings = setting.getSetting();
+  if (_version !== undefined && _version !== settings.version) {
+    settings.version = _version;
+    utility.storeData(JSON.stringify(settings), setting.SETTINGS_FILE);
+  }
+}
+
  function manageUpdates() {
    var busy = false;
 
