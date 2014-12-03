@@ -15,6 +15,7 @@ var path = require('path');
 var updateManager = require('./update-manager');
 var relativeAppPath = path.resolve('viLogged-Client/dist');
 var PORT = 8088;
+var cronJob = require('./crone');
 
 // configuration =================
 
@@ -152,5 +153,8 @@ app.post('/api/settings', function(req, res) {
 
 app.listen(PORT);
 updateManager();
+if (setting.getSetting().system === 'server') {
+  cronJob();
+}
 console.log("App listening on port "+PORT);
 
