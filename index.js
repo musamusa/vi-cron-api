@@ -128,6 +128,21 @@ app.post('/api/app-config', function(req, res) {
 });
 
 
+app.post('/api/ldap-config', function(req, res) {
+
+  var settingFile = utility.ROOT_DIR+'/viLogged/ldap.json';
+
+  var appConfig = req.body;
+
+  if (utility.storeData(JSON.stringify(appConfig), settingFile)) {
+    res.json(appConfig);
+  } else {
+    res.statusCode(500);
+    res.json({reason: 'cannot save data'});
+  }
+});
+
+
 app.get('/api/settings', function(req, res) {
   var settings_file = utility.JSON_DIR+'/settings.json';
   var settings = {};
