@@ -1,1 +1,1 @@
-{"system":"server","version":"1.0.0","client":{"backend":"http://localhost:8000","localBrowserPort":"80","remoteBackend":"http://vilogged.musamusa.com:80","backendCommon":"/api/v1","couchDB":"http://db.musamusa.com:5984","localDB":"http://localhost:5984"}}
+{"system":"server","version":"1.0.0"}
