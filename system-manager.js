@@ -29,7 +29,7 @@ function getLiveConfig() {
   config.forEach(function(conf) {
     var row = conf.split(':');
     var key = row.shift();
-    mainConfig[key.trim()] = row.join('').replace(/'/g, '').trim();
+    mainConfig[key.trim()] = row.join(':').replace(/'/g, '').trim();
   });
 
   return mainConfig;
