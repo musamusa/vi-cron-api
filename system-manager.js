@@ -19,7 +19,12 @@ function getSetting() {
 }
 
 function getLiveConfig() {
-  var config = utility.loadFile('viLogged-Client/app/scripts/config.js');
+  var configFIle = 'viLogged-Client/app/scripts/config.js';
+  if (!utility.fileExists(configFIle)) {
+    configFIle = 'viLogged-Client/dist/scripts/config.js';
+  }
+  var config = utility.loadFile(configFIle);
+
   config = config.replace('angular.module(\'config\', []) .constant(\'config\', {', '').replace('});', '');
   config = config.replace('api:', '');
   config = config.replace(/[{|}|\\n]/g, '');
@@ -34,8 +39,6 @@ function getLiveConfig() {
 
   return mainConfig;
 }
-
-console.log(getSetting());
 
 module.exports = {
   getSetting: getSetting,
