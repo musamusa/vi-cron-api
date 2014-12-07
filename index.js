@@ -167,7 +167,7 @@ app.post('/api/settings', function(req, res) {
 
 
 app.listen(PORT);
-updateManager();
+updateManager.manageUpdates();
 if (setting.getSetting().system === 'server') {
   cronJob();
 }
