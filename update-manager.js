@@ -188,6 +188,7 @@ function updateSystemVersion(_version) {
 
 module.exports = {
   manageUpdates: manageUpdates,
+  checkUpdate: checkUpdate,
   getUpdate: getUpdate,
   loadUpdate: loadUpdate
 };
