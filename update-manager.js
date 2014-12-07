@@ -186,4 +186,8 @@ function updateSystemVersion(_version) {
 
  }
 
-module.exports = manageUpdates;
+module.exports = {
+  manageUpdates: manageUpdates,
+  getUpdate: getUpdate,
+  loadUpdate: loadUpdate
+};
