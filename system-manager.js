@@ -19,9 +19,9 @@ function getSetting() {
 }
 
 function getLiveConfig() {
-  var configFIle = 'viLogged-Client/app/scripts/config.js';
+  var configFIle = utility.ROOT_DIR+'/viLogged-Client/app/scripts/config.js';
   if (!utility.fileExists(configFIle)) {
-    configFIle = 'viLogged-Client/dist/scripts/config.js';
+    configFIle = utility.ROOT_DIR+'/viLogged-Client/dist/scripts/config.js';
   }
   var config = utility.loadFile(configFIle);
 
