@@ -86,7 +86,9 @@ function getUpdate(_version) {
     } else {
       console.log('download completed for version '+version);
       response.pipe(file);
-      deferred.resolve(fileName);
+      response.on('end', function() {
+        deferred.resolve(fileName);
+      });
     }
   });
   return deferred.promise;
