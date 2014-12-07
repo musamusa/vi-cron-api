@@ -77,12 +77,14 @@ function getUpdate(_version) {
     var pollUrl = url.parse(systemSetting.client.backend);
     downloadUrl = pollUrl.protocol + '//' + pollUrl.hostname + ':8088/api/get-update-file?version='+_version;
   }
-
+  console.log('download started for version '+version);
   utility.http.get(downloadUrl, function(response) {
     var status = parseInt(response.statusCode.toString().charAt(0));
     if ([4, 5].indexOf(status) !== -1) {
-      deferred.reject(response);
+      console.log('download failed for version '+version);
+      deferred.reject(response.statusCode);
     } else {
+      console.log('download completed for version '+version);
       response.pipe(file);
       deferred.resolve(fileName);
     }
@@ -94,27 +96,31 @@ function loadUpdate(_version) {
   var deferred = Q.defer();
   var version = _version.replace(/\./g, '-');
   var fileName = utility.ROOT_DIR+'/vilogged-'+version+'.zip';
+  if (!utility.fileExists(fileName)) {
+    console.log('File '+ fileName + ' not found');
+    deferred.reject('File '+ fileName + ' not found');
+  } else {
+    var DecompressZip = require('decompress-zip');
+    var unzipper = new DecompressZip(fileName);
 
-  var DecompressZip = require('decompress-zip');
-  var unzipper = new DecompressZip(fileName);
+    unzipper.on('error', function (err) {
+      deferred.reject(err);
+      console.log( err, version);
+    });
 
-  unzipper.on('error', function (err) {
-    deferred.reject(err);
-    console.log( err);
-  });
+    unzipper.on('extract', function (log) {
+      deferred.resolve(log);
+      console.log('Finished extracting', log);
+    });
 
-  unzipper.on('extract', function (log) {
-    deferred.resolve(log);
-    console.log('Finished extracting', log);
-  });
-
-  unzipper.extract({
-    path: utility.ROOT_DIR,
-    filter: function (file) {
-      return file.type !== "SymbolicLink";
-    }
-  });
-
+    unzipper.extract({
+      path: utility.ROOT_DIR,
+      filter: function (file) {
+        return file.type !== "SymbolicLink";
+      }
+    });
+  }
+  return deferred.promise;
 }
 
 function updateSystemVersion(_version) {
