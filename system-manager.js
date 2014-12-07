@@ -27,7 +27,7 @@ function getLiveConfig() {
 
   config = config.replace('angular.module(\'config\', []) .constant(\'config\', {', '').replace('});', '');
   config = config.replace('api:', '');
-  config = config.replace(/[{|}|\\n]/g, '');
+  config = config.replace(/[{|}]/g, '');
   config = config.replace(/(\r\n|\n|\r)/gm,'');
   config = config.split(',');
   var mainConfig = {};
