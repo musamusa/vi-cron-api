@@ -70,7 +70,7 @@ function getUpdate(_version) {
 
   var version = _version.replace(/\./g, '-');
   var fileName = 'vilogged-'+version+'.zip';
-  var file = utility.fs.createWriteStream(fileName);
+  var file = utility.fs.createWriteStream(utility.ROOT_DIR+'/'+fileName);
 
   var downloadUrl = 'http://dev.musamusa.com:1979/vilogged-updates/'+fileName;
   if (systemSetting.system === 'client') {
