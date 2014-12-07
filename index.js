@@ -13,7 +13,7 @@ var bodyParser = require('body-parser');    // pull information from HTML POST (
 var methodOverride = require('method-override'); // simulate DELETE and PUT (express4)
 var path = require('path');
 var updateManager = require('./update-manager');
-var relativeAppPath = path.resolve('viLogged-Client/dist');
+var relativeAppPath = path.resolve(utility.ROOT_DIR + 'viLogged-Client/dist');
 var PORT = 8088;
 var cronJob = require('./crone');
 
