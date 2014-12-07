@@ -68,7 +68,7 @@ function getUpdate(_version) {
   var systemSetting = setting.getSetting();
 
 
-  var version = _version.replace(/\./, '-');
+  var version = _version.replace(/\./g, '-');
   var fileName = 'vilogged-'+version+'.zip';
   var file = utility.fs.createWriteStream(fileName);
 
@@ -92,7 +92,7 @@ function getUpdate(_version) {
 
 function loadUpdate(_version) {
   var deferred = Q.defer();
-  var version = _version.replace(/\./, '-');
+  var version = _version.replace(/\./g, '-');
   var fileName = utility.ROOT_DIR+'/vilogged-'+version+'.zip';
 
   var DecompressZip = require('decompress-zip');
@@ -127,6 +127,7 @@ function updateSystemVersion(_version) {
 
  function manageUpdates() {
    var busy = false;
+   var DELAY = 60000 * 60; //1hr
 
    setInterval(function() {
      if (!busy) {
@@ -175,7 +176,7 @@ function updateSystemVersion(_version) {
      }
 
 
-   }, 60000 * 60);
+   }, DELAY);
 
  }
 
