@@ -112,7 +112,7 @@ function loadUpdate(_version) {
 
     unzipper.on('extract', function (log) {
       deferred.resolve(log);
-      console.log('Finished extracting', log);
+      console.log('Finished extracting');
     });
 
     unzipper.extract({
@@ -160,7 +160,7 @@ function updateSystemVersion(_version) {
                          console.log('exec error: ' + error);
                        }
                      });
-
+                    busy = false;
                    })
                    .catch(function(reason) {
                      busy = false;
