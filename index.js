@@ -171,5 +171,4 @@ updateManager();
 if (setting.getSetting().system === 'server') {
   cronJob();
 }
-console.log("App listening on port "+PORT);
 
