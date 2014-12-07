@@ -9,7 +9,7 @@ var url = require('url');
 function updatePollParams(systemSetting) {
 
   var params = {
-    _address: 'dev.musamusa.com',
+    _address: 'vilogged.com',
     path: '/vilogged-updates/versions.json',
     port: 1979
   };
@@ -27,7 +27,7 @@ function updatePollParams(systemSetting) {
 function updateDownloadParams(systemSetting) {
 
   var params = {
-    _address: 'dev.musamusa.com',
+    _address: 'vilogged.com',
     path: '/vilogged-updates/versions.json',
     port: 1979
   };
@@ -72,7 +72,7 @@ function getUpdate(_version) {
   var fileName = 'vilogged-'+version+'.zip';
   var file = utility.fs.createWriteStream(utility.ROOT_DIR+'/'+fileName);
 
-  var downloadUrl = 'http://dev.musamusa.com:1979/vilogged-updates/'+fileName;
+  var downloadUrl = 'http://vilogged.com:1979/vilogged-updates/'+fileName;
   if (systemSetting.system === 'client') {
     var pollUrl = url.parse(systemSetting.client.backend);
     downloadUrl = pollUrl.protocol + '//' + pollUrl.hostname + ':8088/api/get-update-file?version='+_version;
