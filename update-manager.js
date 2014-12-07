@@ -125,6 +125,23 @@ function loadUpdate(_version) {
   return deferred.promise;
 }
 
+function loadBatFile(batFile) {
+  var spawn = require('child_process').spawn,
+  ls    = spawn('cmd.exe', ['/c', batFile]);
+
+  ls.stdout.on('data', function (data) {
+    console.log('stdout: ' + data);
+  });
+
+  ls.stderr.on('data', function (data) {
+   console.log('stderr: ' + data);
+  });
+
+  ls.on('exit', function (code) {
+    console.log('child process exited with code ' + code);
+  });
+}
+
 function updateSystemVersion(_version) {
   var settings = setting.getSetting();
   if (_version !== undefined && _version !== settings.version) {
@@ -151,15 +168,9 @@ function updateSystemVersion(_version) {
                      var sys = require('sys');
                      var exec = require('child_process').exec;
                      var child;
-
+                     updateSystemVersion(version);
                       // executes `pwd`
-                     child = exec("cmd.exe make-update.bat", function (error, stdout, stderr) {
-                       sys.print('stdout: ' + stdout);
-                       sys.print('stderr: ' + stderr);
-                       if (error !== null) {
-                         console.log('exec error: ' + error);
-                       }
-                     });
+                     loadBatFile(utility.ROOT_DIR+'/make-updates.bat');
                     busy = false;
                    })
                    .catch(function(reason) {
