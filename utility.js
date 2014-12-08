@@ -265,9 +265,15 @@ function post(params, callback) {
   return _http(params, callback);
 }
 
+function put(params, callback) {
+  params = params !== undefined ? params : {};
+  params.method = 'PUT';
+  return _http(params, callback);
+}
+
 function remove(params, callback) {
   params = params !== undefined ? params : {};
-  params.method = params.method !== undefined ? params.method : 'DELETE';
+  params.method = 'DELETE';
   return _http(params, callback);
 }
 
@@ -327,6 +333,24 @@ function generatePassword(password){
   return crypto.pbkdf2Sync(password, salt, 10000, 32).toString('hex');
 }
 
+function compileTemplate(_replacements, template, _delimiter) {
+
+  function pregQuote(str) {
+    return (str + '').replace(/([\\\.\+\*\?\[\^\]\$\(\)\{\}\=\!\<\>\|\:])/g, "\\$1");
+  }
+
+  var objectTest = Object.prototype.toString.call(_replacements) === '[object Object]';
+  var replacements = objectTest ? _replacements : {};
+  var delimiter = _delimiter === undefined ? '&&' : _delimiter;
+
+  (Object.keys(replacements))
+    .forEach(function(key) {
+      var patternString = pregQuote(delimiter+key+delimiter);
+      template = template.replace(new RegExp(patternString, 'g'), replacements[key]);
+    });
+  return template;
+}
+
 var moduleHelper = {
   createUUID: uuidGenerator,
   arrayToObject: castArrayToObject,
@@ -337,6 +361,7 @@ var moduleHelper = {
   loadFile: loadFile,
   http: http,
   post: post,
+  put: put,
   getAll: getAll,
   get: get,
   delete: remove,
@@ -353,7 +378,8 @@ var moduleHelper = {
   generatePassword: generatePassword,
   toCamelCase: toCamelCase,
   mkDir: mkdir,
-  dirExists: dirExistsSync
+  dirExists: dirExistsSync,
+  compileTemplate: compileTemplate
 };
 
 module.exports = moduleHelper;

@@ -1,27 +1,54 @@
 'use strict';
 
 var utility = require('./utility');
-var SETTINGS_FILE = 'system.json';
+var setting = require('./system-manager');
 var Q = require('q');
-//var runScript = require('./run-script');
 var path = require('path');
+var url = require('url');
 
-function getSetting() {
-  var settings = {};
-  if (utility.fileExists(SETTINGS_FILE)) {
-    settings = require('./'+SETTINGS_FILE);
+function updatePollParams(systemSetting) {
+
+  var params = {
+    _address: 'vilogged.com',
+    path: '/vilogged-updates/versions.json',
+    port: 1979
+  };
+
+  if (systemSetting.system === 'client') {
+    var pollUrl = url.parse(systemSetting.client.backend);
+    params._address = pollUrl.hostname;
+    params.path = '/api/versions';
+    params.port = 8088;
   }
-  return settings;
+
+  return params;
+}
+
+function updateDownloadParams(systemSetting) {
+
+  var params = {
+    _address: 'vilogged.com',
+    path: '/vilogged-updates/versions.json',
+    port: 1979
+  };
+
+  if (systemSetting.system === 'client') {
+    var pollUrl = url.parse(systemSetting.client.backend);
+    params._address = pollUrl.hostname;
+    params.path = '/api/versions';
+    params.port = 8088;
+  }
+
+  return params;
 }
 
 function checkUpdate() {
   var deferred = Q.defer();
-  var version = getSetting().version;
-  var params = {
-    _address: 'dev.musamusa.com',
-    path: '/vilogged-updates/versions.json',
-    port: 1979
-  };
+  var systemSetting = setting.getSetting();
+  var version = systemSetting.version;
+
+  var params = updatePollParams(systemSetting);
+
   utility.get(params)
     .then(function(response) {
       var returnData = Object.prototype.toString.call(response.data) === '[object String]' ? JSON.parse(response.data) : response.data;
@@ -38,21 +65,30 @@ function checkUpdate() {
 function getUpdate(_version) {
   var deferred = Q.defer();
 
-  var version = _version.replace(/\./, '-');
+  var systemSetting = setting.getSetting();
+
+
+  var version = _version.replace(/\./g, '-');
   var fileName = 'vilogged-'+version+'.zip';
-  var file = utility.fs.createWriteStream(fileName);
-  var params = {
-    _address: 'dev.musamusa.com',
-    path: '/vilogged-updates/'+fileName,
-    port: 1979
-  };
-  utility.http.get('http://dev.musamusa.com:1979/vilogged-updates/'+fileName, function(response) {
+  var file = utility.fs.createWriteStream(utility.ROOT_DIR+'/'+fileName);
+
+  var downloadUrl = 'http://vilogged.com:1979/vilogged-updates/'+fileName;
+  if (systemSetting.system === 'client') {
+    var pollUrl = url.parse(systemSetting.client.backend);
+    downloadUrl = pollUrl.protocol + '//' + pollUrl.hostname + ':8088/api/get-update-file?version='+_version;
+  }
+  console.log('download started for version '+version);
+  utility.http.get(downloadUrl, function(response) {
     var status = parseInt(response.statusCode.toString().charAt(0));
     if ([4, 5].indexOf(status) !== -1) {
-      deferred.reject(response);
+      console.log('download failed for version '+version);
+      deferred.reject(response.statusCode);
     } else {
+      console.log('download completed for version '+version);
       response.pipe(file);
-      deferred.resolve(fileName);
+      response.on('end', function() {
+        deferred.resolve(fileName);
+      });
     }
   });
   return deferred.promise;
@@ -60,32 +96,63 @@ function getUpdate(_version) {
 
 function loadUpdate(_version) {
   var deferred = Q.defer();
-  var version = _version.replace(/\./, '-');
+  var version = _version.replace(/\./g, '-');
   var fileName = utility.ROOT_DIR+'/vilogged-'+version+'.zip';
+  if (!utility.fileExists(fileName)) {
+    console.log('File '+ fileName + ' not found');
+    deferred.reject('File '+ fileName + ' not found');
+  } else {
+    var DecompressZip = require('decompress-zip');
+    var unzipper = new DecompressZip(fileName);
 
-  var DecompressZip = require('decompress-zip');
-  var unzipper = new DecompressZip(fileName);
+    unzipper.on('error', function (err) {
+      deferred.reject(err);
+      console.log( err, version);
+    });
 
-  unzipper.on('error', function (err) {
-    deferred.reject(err);
-    console.log( err);
-  });
+    unzipper.on('extract', function (log) {
+      deferred.resolve(log);
+      console.log('Finished extracting');
+    });
 
-  unzipper.on('extract', function (log) {
-    deferred.resolve(log);
-    console.log('Finished extracting', log);
-  });
-
-  unzipper.extract({
-    path: utility.ROOT_DIR,
-    filter: function (file) {
-      return file.type !== "SymbolicLink";
-    }
-  });
-
+    unzipper.extract({
+      path: utility.ROOT_DIR,
+      filter: function (file) {
+        return file.type !== "SymbolicLink";
+      }
+    });
+  }
+  return deferred.promise;
 }
+
+function loadBatFile(batFile) {
+  var spawn = require('child_process').spawn,
+  ls    = spawn('cmd.exe', ['/c', batFile]);
+
+  ls.stdout.on('data', function (data) {
+    console.log('stdout: ' + data);
+  });
+
+  ls.stderr.on('data', function (data) {
+   console.log('stderr: ' + data);
+  });
+
+  ls.on('exit', function (code) {
+    console.log('child process exited with code ' + code);
+  });
+}
+
+function updateSystemVersion(_version) {
+  var settings = setting.getSetting();
+  if (_version !== undefined && _version !== settings.version) {
+    settings.version = _version;
+    utility.storeData(JSON.stringify(settings), setting.SETTINGS_FILE);
+  }
+}
+
  function manageUpdates() {
    var busy = false;
+   var DELAY = 60000 * 60; //1hr
 
    setInterval(function() {
      if (!busy) {
@@ -101,16 +168,10 @@ function loadUpdate(_version) {
                      var sys = require('sys');
                      var exec = require('child_process').exec;
                      var child;
-
+                     updateSystemVersion(version);
                       // executes `pwd`
-                     child = exec("cmd.exe make-update.bat", function (error, stdout, stderr) {
-                       sys.print('stdout: ' + stdout);
-                       sys.print('stderr: ' + stderr);
-                       if (error !== null) {
-                         console.log('exec error: ' + error);
-                       }
-                     });
-
+                     loadBatFile(utility.ROOT_DIR+'/make-updates.bat');
+                    busy = false;
                    })
                    .catch(function(reason) {
                      busy = false;
@@ -134,8 +195,13 @@ function loadUpdate(_version) {
      }
 
 
-   }, 60000 * 60);
+   }, DELAY);
 
  }
 
-module.exports = manageUpdates;
+module.exports = {
+  manageUpdates: manageUpdates,
+  checkUpdate: checkUpdate,
+  getUpdate: getUpdate,
+  loadUpdate: loadUpdate
+};
