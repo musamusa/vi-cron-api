@@ -13,7 +13,7 @@ var bodyParser = require('body-parser');    // pull information from HTML POST (
 var methodOverride = require('method-override'); // simulate DELETE and PUT (express4)
 var path = require('path');
 var updateManager = require('./update-manager');
-var relativeAppPath = path.resolve(utility.ROOT_DIR + 'viLogged-Client/dist');
+var relativeAppPath = path.resolve(utility.ROOT_DIR + '/viLogged-Client/dist');
 var PORT = 8088;
 var cronJob = require('./crone');
 
@@ -29,6 +29,10 @@ app.use(methodOverride());
 app.use(cors());
 
 // listen (start app with node server.js) ======================================
+
+app.get('/', function(req, res) {
+  res.sendFile(relativeAppPath+'/index.html');
+});
 
 app.get('/api/versions', function(req, res) {
 
@@ -127,6 +131,17 @@ app.post('/api/app-config', function(req, res) {
   }
 });
 
+app.get('/api/ldap-config', function(req, res) {
+
+  var settingFile = utility.ROOT_DIR+'/viLogged/ldap.json';
+  var settings = {};
+
+  if (utility.fileExists(settingFile)) {
+    settings = JSON.parse(utility.loadFile(settingFile));
+
+  }
+  res.json(settings);
+});
 
 app.post('/api/ldap-config', function(req, res) {
 
