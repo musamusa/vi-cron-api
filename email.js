@@ -15,12 +15,17 @@ var CONFIG = {
 
 if (utility.fileExists(CONFIG_JSON)) {
   var configData = JSON.parse(utility.loadFile(CONFIG_JSON));
-  Object.keys(CONFIG)
-    .forEach(function(key) {
-      if (configData[utility.toCamelCase(key)]) {
-        CONFIG[key] = configData[utility.toCamelCase(key)];
-      }
-    });
+
+  if (configData.serverSetting) {
+    var emailSettings = configData.serverSetting;
+    Object.keys(CONFIG)
+      .forEach(function(key) {
+        if (emailSettings[utility.toCamelCase(key)]) {
+          CONFIG[key] = emailSettings[utility.toCamelCase(key)];
+        }
+      });
+  }
+
 }
 var transporter = nodemailer.createTransport(smtpTransport({
   host: CONFIG.SMTP_HOST,
@@ -48,7 +53,6 @@ function sendEmail(options) {
   });
   return deferred.promise;
 }
-
 module.exports = {
   sendMail: sendEmail
 };
