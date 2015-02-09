@@ -8,20 +8,20 @@ var CONFIG_JSON = utility.JSON_DIR+'/settings.json';
 var CONFIG = {
   SMTP_HOST: 'smtp.zoho.com',
   SMTP_PORT: 587,
-  SMTP_USER: 'ncc@iphtech.com',
-  SMTP_PASS: '*nccnaija#'
+  SMTP_USER: 'ncc@vilogged.com',
+  SMTP_PASS: '*nccnaija#',
+  SMTP_FROM_NAME: 'Nigerian Communications Commission'
 };
 
 if (utility.fileExists(CONFIG_JSON)) {
   var configData = JSON.parse(utility.loadFile(CONFIG_JSON));
   Object.keys(CONFIG)
     .forEach(function(key) {
-      if (configData[key]) {
+      if (configData[utility.toCamelCase(key)]) {
         CONFIG[key] = configData[utility.toCamelCase(key)];
       }
     });
 }
-
 var transporter = nodemailer.createTransport(smtpTransport({
   host: CONFIG.SMTP_HOST,
   port: CONFIG.SMTP_PORT,
@@ -33,8 +33,9 @@ var transporter = nodemailer.createTransport(smtpTransport({
 
 function sendEmail(options) {
   var deferred = Q.defer();
+  var from = CONFIG.SMTP_FROM_NAME ? CONFIG.SMTP_FROM_NAME + ' <'+CONFIG.SMTP_USER+'>' : CONFIG.SMTP_USER;
   transporter.sendMail({
-    from: CONFIG.SMTP_USER,
+    from: from,
     to: options.to,
     subject: options.subject,
     text: options.message
