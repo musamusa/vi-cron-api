@@ -11,7 +11,7 @@ var CONFIG = {
   SMTP_USER: 'ncc@vilogged.com',
   SMTP_PASS: '*nccnaija#',
   SMTP_FROM_NAME: 'Nigerian Communications Commission',
-  EMAIL_REPLY_TO: 'vms@ncc.gov.ng'
+  REPLY_TO_EMAIL: 'vms@ncc.gov.ng'
 };
 
 if (utility.fileExists(CONFIG_JSON)) {
@@ -40,7 +40,7 @@ var transporter = nodemailer.createTransport(smtpTransport({
 function sendEmail(options) {
   var deferred = Q.defer();
   var from = CONFIG.SMTP_FROM_NAME ? CONFIG.SMTP_FROM_NAME + ' <'+CONFIG.SMTP_USER+'>' : CONFIG.SMTP_USER;
-  var replyTo = CONFIG.EMAIL_REPLY_TO ? CONFIG.EMAIL_REPLY_TO : CONFIG.SMTP_USER;
+  var replyTo = CONFIG.REPLY_TO_EMAIL ? CONFIG.REPLY_TO_EMAIL : CONFIG.SMTP_USER;
 
   transporter.sendMail({
     from: from,
@@ -58,11 +58,13 @@ function sendEmail(options) {
   return deferred.promise;
 }
 
+/*
 sendEmail({
   to: 'musakunte@gmail.com',
   subject: 'test reply',
   message: 'test reply'
 });
+*/
 
 module.exports = {
   sendMail: sendEmail
