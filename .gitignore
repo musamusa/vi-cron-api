@@ -2,7 +2,13 @@ node_modules
 docs/
 json/
 public
+server
+viLogged-Client
 .tmp
 .idea/
 config/config.json
 system.json
+viLogged.db
+viLogged
+notification-log.json
+test.js
