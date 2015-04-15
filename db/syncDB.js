@@ -2,13 +2,17 @@
 var connection = require('./index.js');
 var Users = require('../api/v1/users/model');
 var Visitors = require('../api/v1/visitors/model');
+require('../api/v1/appointments/model');
+require('../api/v1/departments/model');
+require('../api/v1/entrance/model');
+require('../api/v1/restricted-items/model');
 var utility = require('../utility');
 
 
 connection
-  .sync({force: true})
+  .sync()
   .complete(function(err) {
-    /*if (!!err) {
+    if (!!err) {
       console.log('An error occurred while creating the table:', err)
     } else {
       Users.create({
@@ -30,6 +34,5 @@ connection
 
         }
       });
-      console.log('It worked!')
-    }*/
+    }
   });
