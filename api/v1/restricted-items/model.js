@@ -9,13 +9,39 @@ var Entrance = connection.define('Entrance', {
       msg: 'This field is required'
     }
   },
-  entrance_name: {
+  item_name: {
     type: Sequelize.STRING,
     allowNull: false,
     validate: {
       is: {
         args: /^[a-zA-Z0-9_]{3,20}$/,
         msg: 'Entrance name must contain only alphabetical and numeric characters'
+      },
+      notEmpty: {
+        msg: 'This field is required'
+      }
+    }
+  },
+  item_code: {
+    type: Sequelize.STRING,
+    allowNull: false,
+    validate: {
+      is: {
+        args: /^[a-zA-Z0-9_]{3,20}$/,
+        msg: 'Item code can contain only alphabetical and numeric characters'
+      },
+      notEmpty: {
+        msg: 'This field is required'
+      }
+    }
+  },
+  item_type: {
+    type: Sequelize.STRING,
+    allowNull: false,
+    validate: {
+      is: {
+        args: /^[a-zA-Z0-9_]{3,20}$/,
+        msg: 'Item type can contain only alphabetical and numeric characters'
       },
       notEmpty: {
         msg: 'This field is required'
