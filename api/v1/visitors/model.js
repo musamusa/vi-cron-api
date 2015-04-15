@@ -65,7 +65,61 @@ var Visitors = connection.define('Visitors', {
     allowNull: true,
     defaultValue: ''
   },
-  date_of_birth: Sequelize.STRING
+  nationality: {
+    type: Sequelize.STRING,
+    allowNull: true,
+    defaultValue: ''
+  },
+  state_of_origin: {
+    type: Sequelize.STRING,
+    allowNull: true,
+    defaultValue: ''
+  },
+  lga_of_origin: {
+    type: Sequelize.STRING,
+    allowNull: true,
+    defaultValue: ''
+  },
+  image: {
+    type: Sequelize.TEXT,
+    allowNull: true,
+    defaultValue: ''
+  },
+  fingerprint: {
+    type: Sequelize.TEXT,
+    allowNull: true,
+    defaultValue: ''
+  },
+  visitors_pass_code: {
+    type: Sequelize.STRING,
+    allowNull: true,
+    defaultValue: ''
+  },
+  date_of_birth: {
+    type: Sequelize.STRING,
+    allowNull: true,
+    defaultValue: ''
+  },
+  group_type: {
+    type: Sequelize.STRING,
+    allowNull: true,
+    defaultValue: ''
+  },
+  scanned_signature: {
+    type: Sequelize.TEXT,
+    allowNull: true,
+    defaultValue: ''
+  },
+  created_by: {
+    type: Sequelize.INTEGER,
+    allowNull: true,
+    defaultValue: ''
+  },
+  modified_by: {
+    type: Sequelize.INTEGER,
+    allowNull: true,
+    defaultValue: ''
+  }
 }, {
   updatedAt: 'modified',
   createdAt: 'created'
