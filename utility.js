@@ -41,7 +41,7 @@ function loadFile(fileName) {
 
 var uuidGenerator = function() {
   var now = Date.now();
-  return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
+  return 'xxxxxxxxxxxx4xxxyxxxxxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
     // jshint bitwise: false
     var r = (now + Math.random() * 16) % 16 | 0;
     now = Math.floor(now / 16);
@@ -379,7 +379,8 @@ var moduleHelper = {
   toCamelCase: toCamelCase,
   mkDir: mkdir,
   dirExists: dirExistsSync,
-  compileTemplate: compileTemplate
+  compileTemplate: compileTemplate,
+  uuidGenerator: uuidGenerator
 };
 
 module.exports = moduleHelper;
