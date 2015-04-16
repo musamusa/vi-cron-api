@@ -1,4 +1,4 @@
-
+var Sequelize = require('sequelize');
 var express = require('express')();
 
 'use strict';
@@ -23,13 +23,67 @@ var attr = [
   'modified'
 ];
 
+var nonSearchFields = [
+  'id',
+  'is_superuser',
+  'is_staff',
+  'is_active',
+  'created',
+  'modified'
+];
+
 var attrParams = {attributes: attr};
 
 exports.all = function(req, res) {
+  if (Object.keys(req.query).length !== 0) {
+    attrParams.where = req.query;
+  }
   User.findAll(attrParams)
     .complete(function(err, users) {
       return res.json(users);
     });
+};
+
+exports.search = function(req, res) {
+  if (Object.keys(req.query).length !== 0) {
+    var query = {};
+    var urlQuery = req.query;
+    if (req.query.q) {
+      attr.forEach(function(key) {
+        if (nonSearchFields.indexOf(key) === -1)
+        query[key] = {like: req.query.q }
+      });
+      //query =  Sequelize.or(query);
+    } else {
+      Object.keys(req.query)
+        .forEach(function(key) {
+          query[key] = {like: urlQuery[key]}
+        });
+    }
+
+    attrParams.where = query;
+    User.findAll(attrParams)
+      .complete(function(err, users) {
+        return res.json({u:users, q: query});
+      });
+  } else {
+    res.status(400);
+    res.json('please enter search queries');
+  }
+
+};
+
+exports.get = function(req, res) {
+  var where = {};
+  if (Object.keys(req.query).length !== 0) {
+    User.find({where: req.query, attributes: attr})
+      .complete(function(err, appointment) {
+        res.json(appointment);
+      });
+  } else {
+    res.status(400);
+    res.json('Nothing to see here');
+  }
 };
 
 exports.getUser = function(req, res) {
