@@ -108,11 +108,8 @@ exports.update = function(req, res) {
 
         var Instance = Visitor.build(existing);
         var promises = [
-          Visitor.count({where: {email: existing.email, id: {ne: userID}}}),
-          Visitor.count({where: {username: existing.username, id: {ne: userID}}}),
-          Visitor.count({where: {phone: existing.phone, id: {ne: userID}}}),
-          Visitor.count({where: {work_phone: existing.work_phone, id: {ne: userID}}}),
-          Visitor.count({where: {home_phone: existing.home_phone, id: {ne: userID}}}),
+          Visitor.count({where: {visitors_email: req.body.visitors_email}}),
+          Visitor.count({where: {visitors_phone: req.body.visitors_phone}}),
           Instance.validate()
         ];
         Q.all(promises)
