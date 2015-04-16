@@ -11,6 +11,7 @@ module.exports = function(app) {
   // Insert routes below
   app.use('/api/v1/user', require('./api/v1/users'));
   app.use('/api/v1/visitor', require('./api/v1/visitors'));
+  app.use('/api/v1/appointment', require('./api/v1/appointments'));
 
   //app.route('/:url(api|auth|components|app|bower_components|assets)/*').get(errors[404]);
 
