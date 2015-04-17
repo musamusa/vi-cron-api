@@ -1,7 +1,7 @@
 var Sequelize = require('sequelize');
 var connection = require('../../../db');
 
-var UserProfile = connection.define('Users', {
+var UserProfile = connection.define('UserProfile', {
   user_id: {
     type: Sequelize.INTEGER,
     allowNull: false,
