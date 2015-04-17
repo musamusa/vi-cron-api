@@ -15,10 +15,7 @@ var attr = [
   'is_superuser',
   'is_staff',
   'is_active',
-  'phone',
-  'work_phone',
-  'home_phone',
-  'department',
+  'last_login',
   'created',
   'modified'
 ];
