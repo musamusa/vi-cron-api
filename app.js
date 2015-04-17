@@ -16,7 +16,7 @@ module.exports = function(app) {
   var path = require('path');
   var relativeAppPath = path.resolve(utility.ROOT_DIR + '/viLogged-Client/dist');
 
-  app.use(express.static(relativeAppPath));                 // set the static files location /public/img will be /img for users
+  //app.use(express.static(relativeAppPath));                 // set the static files location /public/img will be /img for users
   app.use(morgan('dev'));                                         // log every request to the console
   app.use(bodyParser.urlencoded({'extended':'true'}));            // parse application/x-www-form-urlencoded
   app.use(bodyParser.json());                                     // parse application/json
@@ -27,7 +27,7 @@ module.exports = function(app) {
 // listen (start app with node server.js) ======================================
 
   app.get('/', function(req, res) {
-    res.sendFile(relativeAppPath+'/index.html');
+    res.json('api server online');
   });
 
   app.get('/api/versions', function(req, res) {

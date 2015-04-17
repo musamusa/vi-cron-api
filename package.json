@@ -2,11 +2,13 @@
   "name": "vi-logged-cron",
   "version": "0.0.1",
   "dependencies": {
+    "activedirectory": "^0.6.3",
     "body-parser": "^1.9.2",
     "cors": "^2.5.2",
     "decompress-zip": "0.0.8",
     "emailjs": "^0.3.12",
     "express": "^4.10.2",
+    "jwt-simple": "^0.3.0",
     "method-override": "^2.3.0",
     "mkdirp": "^0.5.0",
     "morgan": "^1.5.0",

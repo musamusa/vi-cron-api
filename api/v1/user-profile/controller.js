@@ -3,30 +3,23 @@ var express = require('express')();
 
 'use strict';
 var utility = require('../../../utility');
-var User = require('./model');
+var UserProfile = require('./model');
 var Q = require('q');
 
 var attr = [
   'id',
-  'username',
-  'first_name',
-  'last_name',
-  'email',
-  'is_superuser',
-  'is_staff',
-  'is_active',
-  'last_login',
-  'created',
-  'modified'
+  'phone',
+  'work_phone',
+  'home_phone',
+  'department',
+  'gender',
+  'image',
+  'designation',
+  'department_floor'
 ];
 
 var nonSearchFields = [
-  'id',
-  'is_superuser',
-  'is_staff',
-  'is_active',
-  'created',
-  'modified'
+  'id'
 ];
 
 var attrParams = {attributes: attr};
@@ -35,7 +28,7 @@ exports.all = function(req, res) {
   if (Object.keys(req.query).length !== 0) {
     attrParams.where = req.query;
   }
-  User.findAll(attrParams)
+  UserProfile.findAll(attrParams)
     .complete(function(err, users) {
       return res.json(users);
     });
@@ -59,7 +52,7 @@ exports.search = function(req, res) {
     }
 
     attrParams.where = query;
-    User.findAll(attrParams)
+    UserProfile.findAll(attrParams)
       .complete(function(err, users) {
         return res.json({u:users, q: query});
       });
@@ -73,7 +66,7 @@ exports.search = function(req, res) {
 exports.get = function(req, res) {
   var where = {};
   if (Object.keys(req.query).length !== 0) {
-    User.find({where: req.query, attributes: attr})
+    UserProfile.find({where: req.query, attributes: attr})
       .complete(function(err, appointment) {
         res.json(appointment);
       });
@@ -83,16 +76,16 @@ exports.get = function(req, res) {
   }
 };
 
-exports.getUser = function(req, res) {
+exports.getUserProfile = function(req, res) {
 
-  User.find({where: {id: req.params.id}, attributes: attr})
+  UserProfile.find({where: {id: req.params.id}, attributes: attr})
     .complete(function(err, user) {
       res.json(user);
     });
 };
 
 exports.create = function(req, res) {
-  var userInstance = User.build(req.body);
+  var userInstance = UserProfile.build(req.body);
 
   if (req.body.user_profile) {
     var userProfile = req.body['user_profile'];
@@ -108,11 +101,11 @@ exports.create = function(req, res) {
   }
 
   var promises = [
-    User.count({where: {email: req.body.email}}),
-    User.count({where: {username: req.body.username}}),
-    User.count({where: {phone: req.body.phone}}),
-    User.count({where: {work_phone: req.body.work_phone}}),
-    User.count({where: {home_phone: req.body.home_phone}}),
+    UserProfile.count({where: {email: req.body.email}}),
+    UserProfile.count({where: {username: req.body.username}}),
+    UserProfile.count({where: {phone: req.body.phone}}),
+    UserProfile.count({where: {work_phone: req.body.work_phone}}),
+    UserProfile.count({where: {home_phone: req.body.home_phone}}),
     userInstance.validate()
   ];
   Q.all(promises)
@@ -166,7 +159,7 @@ exports.create = function(req, res) {
 exports.update = function(req, res) {
   var userID = parseInt(req.params.id);
   attr.push('password');
-  User.find({where: {id: userID}, attributes: attr})
+  UserProfile.find({where: {id: userID}, attributes: attr})
     .complete(function(err, user) {
 
       if (!err && user) {
@@ -198,13 +191,13 @@ exports.update = function(req, res) {
           }
         }
 
-        var userInstance = User.build(existing);
+        var userInstance = UserProfile.build(existing);
         var promises = [
-          User.count({where: {email: existing.email, id: {ne: userID}}}),
-          User.count({where: {username: existing.username, id: {ne: userID}}}),
-          User.count({where: {phone: existing.phone, id: {ne: userID}}}),
-          User.count({where: {work_phone: existing.work_phone, id: {ne: userID}}}),
-          User.count({where: {home_phone: existing.home_phone, id: {ne: userID}}}),
+          UserProfile.count({where: {email: existing.email, id: {ne: userID}}}),
+          UserProfile.count({where: {username: existing.username, id: {ne: userID}}}),
+          UserProfile.count({where: {phone: existing.phone, id: {ne: userID}}}),
+          UserProfile.count({where: {work_phone: existing.work_phone, id: {ne: userID}}}),
+          UserProfile.count({where: {home_phone: existing.home_phone, id: {ne: userID}}}),
           userInstance.validate()
         ];
         Q.all(promises)
