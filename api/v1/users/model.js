@@ -75,35 +75,11 @@ var User = connection.define('Users', {
       }
     }
   },
-  phone: {
-    type: Sequelize.STRING,
-    validate: {
-      notEmpty: {
-        msg: 'This field is required'
-      }
-    }
-  },
-  work_phone: {
-    type: Sequelize.STRING,
+  last_login: {
     allowNull: true,
-    defaultValue: '',
-    validate: {
-      //isNumeric: {
-      //msg: 'Only numbers allowed'
-      //}
-    }
-  },
-  home_phone: {
-    type: Sequelize.STRING,
-    allowNull: true,
-    defaultValue: '',
-    validate: {
-      //isNumeric: {
-      //msg: 'Only numbers allowed'
-      //}
-    }
-  },
-  department: Sequelize.STRING
+    type: Sequelize.DATE,
+    defaultValue: ''
+  }
 }, {
   updatedAt: 'modified',
   createdAt: 'created'
