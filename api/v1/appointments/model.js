@@ -49,16 +49,16 @@ var Appointments = connection.define('Appointments', {
   },
   escort_required: {
     allowNull: true,
-    type: Sequelize.STRING,
+    type: Sequelize.BOOLEAN,
     defaultValue: ''
   },
   is_approved: {
-    type: Sequelize.STRING,
+    type: Sequelize.BOOLEAN,
     allowNull: true,
     defaultValue: ''
   },
   is_expired: {
-    type: Sequelize.STRING,
+    type: Sequelize.BOOLEAN,
     allowNull: true,
     defaultValue: ''
   },
@@ -78,7 +78,7 @@ var Appointments = connection.define('Appointments', {
     defaultValue: ''
   },
   entrance_id: {
-    type: Sequelize.STRING,
+    type: Sequelize.INTEGER,
     allowNull: true,
     defaultValue: ''
   },
@@ -98,7 +98,7 @@ var Appointments = connection.define('Appointments', {
     defaultValue: ''
   },
   visitor_id: {
-    type: Sequelize.STRING,
+    type: Sequelize.INTEGER,
     allowNull: true,
     defaultValue: ''
   },
