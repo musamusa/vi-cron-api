@@ -13,7 +13,7 @@ function getAppointments() {
   var deferred = Q.defer();
   var params = {
     _address: backendDomain.hostname,
-    path: '/api/v1/appointments/nested?is_expired=false',
+    path: '/api/v1/appointments/all?is_expired=false',
     port: backendDomain.port
   };
   utility.get(params)

@@ -3,7 +3,8 @@
 var Q = require('q');
 var utility = require('./utility');
 var queryString = require('querystring');
-var CONFIG_JSON = utility.JSON_DIR+'/settings.json';
+
+var setting = require('./system-manager').getSetting();
 var CONFIG = {
   SMS_USER: 'musakunte@gmail.com',
   SMS_PASS: 'nccSMStest20',
@@ -12,8 +13,8 @@ var CONFIG = {
   SMS_API_PATH: '/customer/api/'
 };
 
-if (utility.fileExists(CONFIG_JSON)) {
-  var configData = JSON.parse(utility.loadFile(CONFIG_JSON));
+if (setting.smsSetting) {
+  var configData = setting.smsSetting;
   Object.keys(CONFIG)
     .forEach(function(key) {
       if (configData[key]) {
@@ -23,7 +24,6 @@ if (utility.fileExists(CONFIG_JSON)) {
 }
 
 function sendSMS(options) {
-  console.log('started');
   var deferred = Q.defer();
   var data = {
     username: CONFIG.SMS_USER,

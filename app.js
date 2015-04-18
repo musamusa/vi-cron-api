@@ -99,7 +99,7 @@ module.exports = function(app) {
     }
 
 
-    var appConfig = req.body.localSetting;
+    var appConfig = req.body;
     var api = {api: appConfig};
 
     var configTemplate = '' +
@@ -127,51 +127,103 @@ module.exports = function(app) {
     }
   });
 
-  app.get('/api/ldap-config', function(req, res) {
+  app.get('/api/ldap-settings', function(req, res) {
 
-    var settingFile = utility.ROOT_DIR+'/viLogged/ldap.json';
-    var settings = {};
+    var systemSetting = setting.getSetting();
+    var ldapSettings = {};
 
-    if (utility.fileExists(settingFile)) {
-      settings = JSON.parse(utility.loadFile(settingFile));
-
+    if (systemSetting.ldapSettings) {
+      ldapSettings = systemSetting.ldapSettings;
     }
-    res.json(settings);
+
+    res.json(ldapSettings);
   });
 
-  app.post('/api/ldap-config', function(req, res) {
+  app.post('/api/ldap-settings', function(req, res) {
 
-    var settingFile = utility.ROOT_DIR+'/viLogged/ldap.json';
+    var ldapSettings = req.body;
+    var systemSetting = setting.getSetting();
+    systemSetting.ldapSettings = ldapSettings;
 
-    var appConfig = req.body;
-
-    if (utility.storeData(JSON.stringify(appConfig), settingFile)) {
-      res.json(appConfig);
+    if (utility.storeData(JSON.stringify(systemSetting), setting.SETTINGS_FILE)) {
+      res.json(ldapSettings);
     } else {
       res.statusCode(500);
       res.json({reason: 'cannot save data'});
     }
   });
 
+  app.get('/api/database-settings', function(req, res) {
 
-  app.get('/api/settings', function(req, res) {
-    var settings_file = utility.JSON_DIR+'/settings.json';
-    var settings = {};
-    if (utility.fileExists(settings_file)) {
-      settings = JSON.parse(utility.loadFile(settings_file));
+    var systemSetting = setting.getSetting();
+    var databaseSettings = {};
+
+    if (systemSetting.databaseSettings) {
+      databaseSettings = systemSetting.databaseSettings;
     }
-    res.json(settings);
+
+    res.json(databaseSettings);
   });
 
-  app.post('/api/settings', function(req, res) {
-    var settings_file = utility.JSON_DIR+'/settings.json';
-    var settings = req.body;
+  app.post('/api/database-settings', function(req, res) {
 
-    if (utility.storeData(JSON.stringify(settings), settings_file)) {
-      res.json({message: 'settings saved'});
+    var databaseSettings = req.body;
+    var systemSetting = setting.getSetting();
+    systemSetting.databaseSettings = databaseSettings;
+
+    if (utility.storeData(JSON.stringify(systemSetting), setting.SETTINGS_FILE)) {
+      res.json(databaseSettings);
     } else {
       res.statusCode(500);
-      res.json({message: 'unable to save settings'});
+      res.json({reason: 'cannot save data'});
+    }
+  });
+
+  app.get('/api/email-settings', function(req, res) {
+    var systemSetting = setting.getSetting();
+    var emailSetting = {};
+
+    if (systemSetting.emailSetting) {
+      emailSetting = systemSetting.emailSetting;
+    }
+
+    res.json(emailSetting);
+  });
+
+  app.post('/api/email-settings', function(req, res) {
+    var emailSetting = req.body;
+    var systemSetting = setting.getSetting();
+    systemSetting.emailSetting = emailSetting;
+
+    if (utility.storeData(JSON.stringify(systemSetting), setting.SETTINGS_FILE)) {
+      res.json(emailSetting);
+    } else {
+      res.statusCode(500);
+      res.json({reason: 'cannot save data'});
+    }
+  });
+
+  app.get('/api/sms-settings', function(req, res) {
+    var systemSetting = setting.getSetting();
+    var smsSetting = {};
+
+    if (systemSetting.smsSetting) {
+      smsSetting = systemSetting.smsSetting;
+    }
+
+    res.json(smsSetting);
+  });
+
+  app.post('/api/sms-settings', function(req, res) {
+    var smsSetting = req.body;
+    var systemSetting = setting.getSetting();
+    systemSetting.smsSetting = smsSetting;
+
+    if (utility.storeData(JSON.stringify(systemSetting), setting.SETTINGS_FILE)) {
+      res.json(smsSetting);
+    } else {
+      res.statusCode(500);
+      res.json({reason: 'cannot save data'});
     }
   });
 };

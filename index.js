@@ -17,8 +17,7 @@ process.on('uncaughtException', function (err) {
   console.log(err);
 });
 
-app.listen(PORT);
-updateManager.manageUpdates();
+app.listen(PORT);updateManager.manageUpdates();
 if (setting.getSetting().system === 'server') {
   cronJob();
 }

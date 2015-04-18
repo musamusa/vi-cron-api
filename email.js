@@ -4,7 +4,8 @@ var nodemailer = require('nodemailer');
 var smtpTransport = require('nodemailer-smtp-transport');
 var Q = require('q');
 var utility = require('./utility');
-var CONFIG_JSON = utility.JSON_DIR+'/settingsl.json';
+var setting = require('./system-manager').getSetting();
+
 var CONFIG = {
   SMTP_HOST: 'smtp.zoho.com',
   SMTP_PORT: 587,
@@ -14,11 +15,11 @@ var CONFIG = {
   REPLY_TO_EMAIL: 'vms@ncc.gov.ng'
 };
 
-if (utility.fileExists(CONFIG_JSON)) {
-  var configData = JSON.parse(utility.loadFile(CONFIG_JSON));
+if (setting.emailSetting) {
+  var configData = setting.emailSetting;
 
   if (configData.serverSetting) {
-    var emailSettings = configData.serverSetting;
+    var emailSettings = configData;
     Object.keys(CONFIG)
       .forEach(function(key) {
         if (emailSettings[utility.toCamelCase(key)] && emailSettings[utility.toCamelCase(key)] !== '') {
