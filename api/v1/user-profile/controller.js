@@ -23,6 +23,7 @@ var nonSearchFields = [
 ];
 
 var attrParams = {attributes: attr};
+exports.attr = attr;
 
 exports.all = function(req, res) {
   if (Object.keys(req.query).length !== 0) {
