@@ -1,5 +1,6 @@
 var jwt = require('jwt-simple');
 var User = require('../../v1/users/model');
+var UserController = require('../../v1/users/controller');
 var $q = require('q');
 var utility = require('../../../utility');
 
@@ -59,13 +60,19 @@ var auth = {
 
   validate: function(username, password) {
     var deferred = $q.defer();
-    User.find({where: {username: username, password: utility.generatePassword(password)}})
-      .complete(function(err, user) {
-        if (err) {
-          console.log(err);
-          deferred.reject(err);
+    var params = {
+      query: {
+        username: username,
+        password: utility.generatePassword(password)
+      },
+      limit: 1
+    };
+    UserController.query(params)
+      .then(function(user) {
+        if (!user.length) {
+          deferred.reject('no user');
         } else {
-          deferred.resolve(user);
+          deferred.resolve(user[0]);
         }
       });
 

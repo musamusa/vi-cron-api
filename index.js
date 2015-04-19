@@ -8,7 +8,7 @@ var express  = require('express');
 var app      = express();                               // create our app w/ express
 var updateManager = require('./update-manager');
 var PORT = 8088;
-var cronJob = require('./crone');
+var cronJob = require('./cron');
 // configuration =================
 require('./app')(app);
 require('./routes')(app);

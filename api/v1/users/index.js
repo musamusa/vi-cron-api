@@ -3,8 +3,6 @@ var controller = require('./controller');
 
 router.get('/', controller.get);
 
-router.get('/search', controller.search);
-
 router.post('/', controller.create);
 
 router.get('/all', controller.all);

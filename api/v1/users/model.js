@@ -49,31 +49,19 @@ var User = connection.define('Users', {
     }
   },
   is_superuser: {
+    allowNull: false,
     type: Sequelize.BOOLEAN,
-    defaultValue: false,
-    set: function(value) {
-      if (toString.call(value) === '[object String]') {
-        return value === 'true';
-      }
-    }
+    defaultValue: 0
   },
   is_staff: {
+    allowNull: false,
     type: Sequelize.BOOLEAN,
-    defaultValue: false,
-    set: function(value) {
-      if (toString.call(value) === '[object String]') {
-        return value === 'true';
-      }
-    }
+    defaultValue: 0
   },
   is_active: {
+    allowNull: false,
     type: Sequelize.BOOLEAN,
-    defaultValue: false,
-    set: function(value) {
-      if (toString.call(value) === '[object String]') {
-        return value === 'true';
-      }
-    }
+    defaultValue: 0
   },
   last_login: {
     allowNull: true,
