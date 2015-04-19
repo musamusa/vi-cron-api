@@ -1,10 +1,12 @@
-var Sequelize = require('sequelize');
-var express = require('express')();
-
 'use strict';
+var UserProfileController = require('../user-profile/controller');
+var UserProfile = require('../user-profile/model');
+var connection = require('../../../db');
+var service = require('./service');
+var express = require('express')();
 var utility = require('../../../utility');
 var User = require('./model');
-var Q = require('q');
+var $q = require('q');
 
 var attr = [
   'id',
@@ -31,51 +33,75 @@ var nonSearchFields = [
 
 var attrParams = {attributes: attr};
 
-exports.all = function(req, res) {
-  if (Object.keys(req.query).length !== 0) {
-    attrParams.where = req.query;
-  }
-  User.findAll(attrParams)
-    .complete(function(err, users) {
-      return res.json(users);
+function _rawQuery(_params) {
+
+  var deferred = $q.defer();
+  var params = _params || {};
+  var where = '', whereList = [], orderBy = '', _limit = '', offset = '', limit = params.limit;
+  var query = params.query || {};
+
+  if (Object.keys(query).length !== 0) {
+    (Object.keys(query)).forEach(function(key) {
+      //make sure fields exists in tables
+      if (attr.indexOf(key) !== -1 ) {
+        whereList.push('a.'+key+' LIKE \''+query[key]+'\'');
+      }
+
+      if (UserProfileController.attr.indexOf(key) !== -1 ) {
+        whereList.push('b.'+key+' LIKE \''+query[key]+'\'');
+      }
     });
-};
 
-exports.search = function(req, res) {
-  if (Object.keys(req.query).length !== 0) {
-    var query = {};
-    var urlQuery = req.query;
-    if (req.query.q) {
-      attr.forEach(function(key) {
-        if (nonSearchFields.indexOf(key) === -1)
-        query[key] = {like: req.query.q }
-      });
-      //query =  Sequelize.or(query);
-    } else {
-      Object.keys(req.query)
-        .forEach(function(key) {
-          query[key] = {like: urlQuery[key]}
-        });
+    _limit = query.limit ? query.limit : limit;
+    _limit = _limit ? ' LIMIT '+_limit : '';
+
+    if (whereList.length > 0) {
+      where = 'WHERE ('+ whereList.join(') AND (') + ')';
     }
-
-    attrParams.where = query;
-    User.findAll(attrParams)
-      .complete(function(err, users) {
-        return res.json({u:users, q: query});
-      });
-  } else {
-    res.status(400);
-    res.json('please enter search queries');
   }
 
+  var userQueryAttr = [];
+  var profileQueryAttr = [];
+  attr.forEach(function(key) {
+    userQueryAttr.push('a.'+key);
+  });
+
+  UserProfileController.attr.forEach(function(key) {
+    userQueryAttr.push('b.'+key);
+  });
+
+  connection.query("SELECT "+userQueryAttr.concat(profileQueryAttr).join(',')+" FROM " +
+  "Users as a LEFT JOIN UserProfiles as b ON (a.id = b.user_id) " + where + _limit)
+    .spread(function(nestedUsers){
+      nestedUsers = service.nestList(nestedUsers, {key: 'user_profile', fields: UserProfileController.attr});
+      deferred.resolve(nestedUsers);
+    });
+  return deferred.promise;
+}
+
+exports.query = _rawQuery;
+
+exports.all = function(req, res) {
+  var params = {
+    query: req.query
+  };
+  _rawQuery(params)
+    .then(function(users) {
+      res.json(users);
+    });
 };
 
 exports.get = function(req, res) {
   var where = {};
   if (Object.keys(req.query).length !== 0) {
-    User.find({where: req.query, attributes: attr})
-      .complete(function(err, appointment) {
-        res.json(appointment);
+    var params = {
+      limit: 1,
+      query: req.query
+    };
+    _rawQuery(params)
+      .then(function(result) {
+        result = result.length ? result[0] : {};
+        res.json(result);
       });
   } else {
     res.status(400);
@@ -85,9 +111,14 @@ exports.get = function(req, res) {
 
 exports.getUser = function(req, res) {
 
-  User.find({where: {id: req.params.id}, attributes: attr})
-    .complete(function(err, user) {
-      res.json(user);
+  var params = {
+    limit: 1,
+    query: req.query
+  };
+  _rawQuery(params)
+    .then(function(result) {
+      result = result.length ? result[0] : {};
+      res.json(result);
     });
 };
 
@@ -110,12 +141,12 @@ exports.create = function(req, res) {
   var promises = [
     User.count({where: {email: req.body.email}}),
     User.count({where: {username: req.body.username}}),
-    User.count({where: {phone: req.body.phone}}),
-    User.count({where: {work_phone: req.body.work_phone}}),
-    User.count({where: {home_phone: req.body.home_phone}}),
+    UserProfile.count({where: {phone: req.body.phone}}),
+    UserProfile.count({where: {work_phone: req.body.work_phone}}),
+    UserProfile.count({where: {home_phone: req.body.home_phone}}),
     userInstance.validate()
   ];
-  Q.all(promises)
+  $q.all(promises)
     .then(function(response) {
       var otherValidation = utility.formatErrors(response[5]);
       var uniqueChecks = [
@@ -207,7 +238,7 @@ exports.update = function(req, res) {
           User.count({where: {home_phone: existing.home_phone, id: {ne: userID}}}),
           userInstance.validate()
         ];
-        Q.all(promises)
+        $q.all(promises)
           .then(function(response) {
 
             var otherValidation = utility.formatErrors(response[5]);
