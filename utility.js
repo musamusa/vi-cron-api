@@ -138,6 +138,7 @@ var removeExtension = function(fileName) {
 function _http(params, callback) {
   var deferred = Q.defer();
   params = params !== undefined ? params : {};
+  params.headers = params.headers || {};
   var postData = params.data != undefined ? params.data : '';
   var _ADDRESS = params._address !== undefined ? params._address : '127.0.0.1';
   var path = params.path !== undefined ? params.path : '';
@@ -150,18 +151,16 @@ function _http(params, callback) {
       path: path,
       port: port,
       method: method,
-      agent: false
+      agent: false,
+      headers: {}
     };
+    (Object.keys(params.headers))
+      .forEach(function(key) {
+        options.headers[key] = params.headers[key];
+      });
     if (postData !== '') {
-      if (params.headers) {
-        options.headers = params.headers
-      } else {
-        options.headers = {
-          'Content-Type': 'application/json',
-          'Content-Length': postData.length
-        };
-      }
-
+      options.headers['Content-Type'] = params.headers['Content-Type'] || 'application/json';
+      options.headers['Content-Length'] = params.headers['Content-Length'] || postData.length;
     }
     if (params.auth != undefined) {
       options.auth = params.auth;
@@ -217,7 +216,7 @@ function _http(params, callback) {
           status: false,
           statusCode: null,
           data: null,
-          reason: error,
+          reason: http.STATUS_CODES[response.statusCode],
           response: response
         });
       });
