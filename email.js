@@ -59,14 +59,6 @@ function sendEmail(options) {
   return deferred.promise;
 }
 
-/*
-sendEmail({
-  to: 'musakunte@gmail.com',
-  subject: 'test reply',
-  message: 'test reply'
-});
-*/
-
 module.exports = {
   sendMail: sendEmail
 };
