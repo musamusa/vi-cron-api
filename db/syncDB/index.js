@@ -17,7 +17,6 @@
   if (args.length > 0) {
     force = args[0] === 'force';
   }
-
   connection
     .sync({force: force})
     .then(function() {
