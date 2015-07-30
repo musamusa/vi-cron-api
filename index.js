@@ -2,25 +2,24 @@
 // server.js
 // set up ========================
 
-var utility = require('./utility');
-var setting = require('./system-manager');
+var utility = require('app/utility');
+var setting = require('./components/config-manager/system-manager');
 var express  = require('express');
 var app      = express();                               // create our app w/ express
-var updateManager = require('./update-manager');
+var updateManager = require('./components/config-manager/update-manager');
 var PORT = process.env.PORT || 8088;
-var cronJob = require('./cron');
+var cronJob = require('./components/cron/cron');
 // configuration =================
 require('./app')(app);
 require('./routes')(app);
+require('./api/components/load-to-cache')();
 
 process.on('uncaughtException', function (err) {
-  if (err.code === 'EADDRINUSE') {
-
-  }
   console.log(err);
 });
 
-app.listen(PORT);updateManager.manageUpdates();
+app.listen(PORT);
+//updateManager.manageUpdates();
 if (setting.getSetting().system === 'server') {
   //cronJob();
 }

@@ -1,5 +1,5 @@
 var jwt = require('jwt-simple');
-var validateUser = require('./auth').validateUser;
+var validateUser = require('./index').validateUser;
 
 module.exports = function(req, res, next) {
 

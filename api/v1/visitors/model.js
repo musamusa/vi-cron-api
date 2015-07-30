@@ -1,9 +1,44 @@
 var Sequelize = require('sequelize');
-var connection = require('../../../db');
+var connection = require('app/db');
+var attr = [
+  '_id',
+  '_rev',
+  'first_name',
+  'last_name',
+  'visitors_email',
+  'visitors_phone',
+  'occupation',
+  'nationality',
+  'company',
+  'company_address',
+  'gender',
+  'state_of_origin',
+  'lga_of_origin',
+  'image',
+  'fingerprint',
+  'signature',
+  'pass_code',
+  'date_of_birth',
+  'group',
+  'created_by',
+  'modified_by',
+  'created',
+  'modified'
+];
 
-var Visitors = connection.define('Visitors', {
-  uuid: {
+var Visitors = connection.define('visitors', {
+  _id: {
     type: Sequelize.STRING,
+    unique: true,
+    primaryKey: true,
+    allowNull: false,
+    notEmpty: {
+      msg: 'This field is required'
+    }
+  },
+  _rev: {
+    type: Sequelize.STRING,
+    unique: true,
     allowNull: false,
     notEmpty: {
       msg: 'This field is required'
@@ -50,7 +85,7 @@ var Visitors = connection.define('Visitors', {
       notEmpty: false
     }
   },
-  company_name: {
+  company: {
     allowNull: true,
     type: Sequelize.STRING,
     defaultValue: ''
@@ -90,7 +125,7 @@ var Visitors = connection.define('Visitors', {
     allowNull: true,
     defaultValue: ''
   },
-  visitors_pass_code: {
+  pass_code: {
     type: Sequelize.STRING,
     allowNull: true,
     defaultValue: ''
@@ -100,29 +135,30 @@ var Visitors = connection.define('Visitors', {
     allowNull: true,
     defaultValue: ''
   },
-  group_type: {
+  group: {
     type: Sequelize.STRING,
     allowNull: true,
     defaultValue: ''
   },
-  scanned_signature: {
+  signature: {
     type: Sequelize.TEXT,
     allowNull: true,
     defaultValue: ''
   },
   created_by: {
-    type: Sequelize.INTEGER,
-    allowNull: true,
-    defaultValue: ''
+    type: Sequelize.STRING,
+    allowNull: true
   },
   modified_by: {
-    type: Sequelize.INTEGER,
-    allowNull: true,
-    defaultValue: ''
+    type: Sequelize.STRING,
+    allowNull: true
   }
 }, {
   updatedAt: 'modified',
   createdAt: 'created'
 });
 
-module.exports = Visitors;
+module.exports = {
+  model: Visitors,
+  attr: attr
+};
