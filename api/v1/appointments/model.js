@@ -1,22 +1,58 @@
 var Sequelize = require('sequelize');
-var connection = require('../../../db');
+var connection = require('app/db');
 
-var Appointments = connection.define('Appointments', {
-  uuid: {
+var attr = [
+  '_id',
+  '_rev',
+  'representing',
+  'purpose',
+  'appointment_date',
+  'visit_start_time',
+  'visit_end_time',
+  'escort_required',
+  'is_approved',
+  'is_expired',
+  'checked_in',
+  'checked_out',
+  'label_code',
+  'created_by',
+  'entrance_id',
+  'host_id',
+  'visitor_id',
+  'modified_by',
+  'appointment_end_date',
+  'teams',
+  'created',
+  'modified'
+];
+
+
+var Appointments = connection.define('appointments', {
+  _id: {
     type: Sequelize.STRING,
+    unique: true,
+    primaryKey: true,
+    allowNull: false,
+    notEmpty: {
+      msg: 'This field is required'
+    }
+  },
+  _rev: {
+    type: Sequelize.STRING,
+    unique: true,
     allowNull: false,
     notEmpty: {
       msg: 'This field is required'
     }
   },
   representing: {
-    allowNull: false,
+    allowNull: true,
     type: Sequelize.STRING,
     validate: {
     }
   },
   purpose: {
-    allowNull: false,
+    allowNull: true,
     type: Sequelize.STRING,
     validate: {
     }
@@ -49,18 +85,15 @@ var Appointments = connection.define('Appointments', {
   },
   escort_required: {
     allowNull: true,
-    type: Sequelize.BOOLEAN,
-    defaultValue: ''
+    type: Sequelize.BOOLEAN
   },
   is_approved: {
     type: Sequelize.BOOLEAN,
-    allowNull: true,
-    defaultValue: ''
+    allowNull: true
   },
   is_expired: {
     type: Sequelize.BOOLEAN,
-    allowNull: true,
-    defaultValue: ''
+    allowNull: true
   },
   checked_in: {
     type: Sequelize.STRING,
@@ -78,14 +111,14 @@ var Appointments = connection.define('Appointments', {
     defaultValue: ''
   },
   entrance_id: {
-    type: Sequelize.INTEGER,
+    type: Sequelize.STRING,
     allowNull: true,
-    defaultValue: ''
+    defaultValue: 0
   },
   appointment_end_date: {
     type: Sequelize.STRING,
     allowNull: true,
-    defaultValue: ''
+    defaultValue: 1
   },
   teams: {
     type: Sequelize.TEXT,
@@ -93,28 +126,31 @@ var Appointments = connection.define('Appointments', {
     defaultValue: ''
   },
   host_id: {
-    type: Sequelize.INTEGER,
+    type: Sequelize.STRING,
     allowNull: true,
-    defaultValue: ''
+    defaultValue: 1
   },
   visitor_id: {
-    type: Sequelize.INTEGER,
+    type: Sequelize.STRING,
     allowNull: true,
-    defaultValue: ''
+    defaultValue: 1
   },
   created_by: {
-    type: Sequelize.INTEGER,
+    type: Sequelize.STRING,
     allowNull: true,
-    defaultValue: ''
+    defaultValue: 1
   },
   modified_by: {
-    type: Sequelize.INTEGER,
+    type: Sequelize.STRING,
     allowNull: true,
-    defaultValue: ''
+    defaultValue: 1
   }
 }, {
   updatedAt: 'modified',
   createdAt: 'created'
 });
 
-module.exports = Appointments;
+module.exports = {
+  model: Appointments,
+  attr: attr
+};

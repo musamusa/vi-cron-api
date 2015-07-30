@@ -1,46 +1,71 @@
 var Sequelize = require('sequelize');
-var connection = require('../../../db');
+var connection = require('app/db');
+var attr = [
+  '_id',
+  '_rev',
+  'name',
+  'floor',
+  'description',
+  'modified_by',
+  'created_by',
+  'created',
+  'modified'
+];
 
-var Department = connection.define('Departments', {
-  uuid: {
+var Model = connection.define('departments', {
+  _id: {
     type: Sequelize.STRING,
+    unique: true,
+    primaryKey: true,
     allowNull: false,
     notEmpty: {
       msg: 'This field is required'
     }
   },
-  department_name: {
+  _rev: {
+    type: Sequelize.STRING,
+    unique: true,
+    allowNull: false,
+    notEmpty: {
+      msg: 'This field is required'
+    }
+  },
+  name: {
     type: Sequelize.STRING,
     allowNull: false,
+    unique: true,
     validate: {
-      is: {
-        args: /^[a-zA-Z]{3,20}$/,
-        msg: 'Department name must contain only alphabetical characters'
-      },
       notEmpty: {
         msg: 'This field is required'
       }
     }
   },
+  floor: {
+    type: Sequelize.STRING,
+    allowNull: true,
+    validate: {
+
+    }
+  },
   description: {
     type: Sequelize.STRING,
-    allowNull: false,
-    notEmpty: {
-      msg: 'This field is required'
+    allowNull: true,
+    validate: {
+
     }
   },
-  modified_by_id: {
-    allowNull: false,
+  modified_by: {
     type: Sequelize.STRING,
+    allowNull: true,
     validate: {
-      notEmpty: true
+
     }
   },
-  created_by_id: {
-    allowNull: false,
+  created_by: {
     type: Sequelize.STRING,
+    allowNull: true,
     validate: {
-      notEmpty: true
+
     }
   }
 }, {
@@ -48,4 +73,7 @@ var Department = connection.define('Departments', {
   createdAt: 'created'
 });
 
-module.exports = Department;
+module.exports = {
+  model: Model,
+  attr: attr
+};

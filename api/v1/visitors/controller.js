@@ -1,155 +1,74 @@
-var express = require('express')();
-
 'use strict';
-var utility = require('../../../utility');
-var Visitor = require('./model');
-var Q = require('q');
-
-var attr = [
-  'id',
-  'uuid',
-  'first_name',
-  'last_name',
-  'visitors_email',
-  'visitors_phone',
-  'occupation',
-  'nationality',
-  'company_name',
-  'company_address',
-  'gender',
-  'state_of_origin',
-  'lga_of_origin',
-  'image',
-  'fingerprint',
-  'scanned_signature',
-  'visitors_pass_code',
-  'date_of_birth',
-  'group_type',
-  'created_by',
-  'modified_by',
-  'created',
-  'modified'
-];
-
-var attrParams = {attributes: attr};
+var service = require('./service');
 
 exports.all = function(req, res) {
-  Visitor.findAll(attrParams)
-    .complete(function(err, users) {
-      return res.json(users);
+  service.all(req, res)
+    .then(function(response) {
+      res.json(response);
+    })
+    .catch(function(reason) {
+      var status = reason.status || 500;
+      res.status(status);
+      res.json(reason.reason);
     });
 };
 
-exports.getVisitor = function(req, res) {
-
-  Visitor.find({where: {uuid: req.params.uuid}, attributes: attr})
-    .complete(function(err, user) {
-      res.json(user);
+exports.get = function(req, res) {
+  service.get(req, res)
+    .then(function(response) {
+      res.json(response);
+    })
+    .catch(function(reason) {
+      var status = reason.status || 500;
+      res.status(status);
+      res.json(reason.reason);
     });
 };
 
 exports.create = function(req, res) {
-  req.body.uuid = utility.uuidGenerator();
-  var Instance = Visitor.build(req.body);
-
-
-  var promises = [
-    Visitor.count({where: {visitors_email: req.body.visitors_email}}),
-    Visitor.count({where: {visitors_phone: req.body.visitors_phone}}),
-    Instance.validate()
-  ];
-  Q.all(promises)
+  service.create(req, res)
     .then(function(response) {
-      var otherValidation = utility.formatErrors(response[2]);
-      var uniqueChecks = [
-        {key: 'visitors_email', message: utility.uniqueCheck(response[0], 'Visitors Email')},
-        {key: 'visitors_phone', message: utility.uniqueCheck(response[1], 'Visitors Phone')}
-      ];
-
-      otherValidation = utility.appendMultipleErrors(otherValidation, uniqueChecks);
-      if (Object.keys(otherValidation).length) {
-        res.status(400);
-        res.json(otherValidation);
-      } else {
-        Instance.save()
-          .complete(function(err, user) {
-            if (err) {
-              res.status(400);
-              res.json({systemError: err});
-            } else {
-              res.json(user);
-            }
-          });
-      }
-
+      res.json(response);
     })
     .catch(function(reason) {
-      res.status(400);
-      res.json(reason);
+      var status = reason.status || 500;
+      res.status(status);
+      res.json(reason.reason);
     });
-
-
-  //return res.json({});
 };
 
 exports.update = function(req, res) {
-  var userID = parseInt(req.params.uuid);
-  Visitor.find({where: {uuid: userID}, attributes: attr})
-    .complete(function(err, user) {
-
-      if (!err && user) {
-        var existing = user.dataValues;
-        Object.keys(existing)
-          .forEach(function(key) {
-            if (req.body[key]) {
-              existing[key] = req.body[key];
-            }
-          });
-
-        var Instance = Visitor.build(existing);
-        var promises = [
-          Visitor.count({where: {visitors_email: req.body.visitors_email}}),
-          Visitor.count({where: {visitors_phone: req.body.visitors_phone}}),
-          Instance.validate()
-        ];
-        Q.all(promises)
+  service.update(req, res)
+    .then(function(response) {
+      res.json(response);
+    })
+    .catch(function(reason) {
+      var status = reason.status || 500;
+      if (status === 404) {
+        service.create(req, res)
           .then(function(response) {
-
-            var otherValidation = utility.formatErrors(response[5]);
-            var uniqueChecks = [
-              {key: 'visitors_email', message: utility.uniqueCheck(response[0], 'Visitors Email')},
-              {key: 'visitors_phone', message: utility.uniqueCheck(response[1], 'Visitors Phone')}
-            ];
-
-
-
-            otherValidation = utility.appendMultipleErrors(otherValidation, uniqueChecks);
-            if (Object.keys(otherValidation).length) {
-              res.status(400);
-              res.json(otherValidation);
-            } else {
-              user.updateAttributes(existing)
-                .complete(function(err, user) {
-                  if (err) {
-                    res.status(500);
-                    res.json({systemError: err});
-                  } else {
-                    res.json(user);
-                  }
-                });
-            }
-
+            res.json(response);
           })
-          .fail(function(reason) {
-            res.status(500);
-            res.json({q_error: reason});
-          })
-          .done();
-
+          .catch(function(reason) {
+            var status = reason.status || 500;
+            res.status(status);
+            res.json(reason.reason);
+          });
       } else {
-        res.status(500);
-        res.json({no_visitor: err});
+        res.status(status);
+        res.json(reason.reason);
       }
+    });
+};
 
+exports.remove = function(req, res) {
+  service.remove(req, res)
+    .then(function(response) {
+      res.json(response);
+    })
+    .catch(function(reason) {
+      var status = reason.status || 500;
+      res.status(status);
+      res.json(reason.reason);
     });
 };

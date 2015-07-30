@@ -1,52 +1,35 @@
 var express = require('express')();
 
 'use strict';
-var utility = require('../../../utility');
+var utility = require('../../../components/utility/index');
 var Appointments = require('./model');
-var Q = require('q');
-
-
-var attr = [
-  'id',
-  'uuid',
-  'representing',
-  'purpose',
-  'appointment_date',
-  'visit_start_time',
-  'visit_end_time',
-  'escort_required',
-  'is_approved',
-  'is_expired',
-  'checked_in',
-  'checked_out',
-  'label_code',
-  'created_by',
-  'entrance_id',
-  'host_id',
-  'visitor_id',
-  'modified_by',
-  'appointment_end_date',
-  'teams',
-  'created',
-  'modified'
-];
+var Model = Appointments.model;
+var attr = Appointments.attr;
+var $q = require('q');
 
 var attrParams = {attributes: attr};
 
 exports.all = function(req, res) {
-  Appointments.findAll(attrParams)
-    .complete(function(err, appointments) {
-      if (err) return res.json(err);
-      return res.json(appointments);
+  Model.findAll(attrParams)
+    .then(function(response) {
+      return res.json(response);
+    })
+    .catch(function(reason) {
+      res.status(500);
+      res.json(reason);
     });
 };
 
 exports.get = function(req, res) {
   var where = {};
   if (Object.keys(req.query).length !== 0) {
-    Appointments.find({where: req.query, attributes: attr})
-      .complete(function(err, appointment) {
-        res.json(appointment);
+    Model.find({where: req.query, attributes: attr})
+      .then(function(response) {
+        res.json(response);
+      })
+      .catch(function(reason) {
+        res.status(500);
+        res.json(reason);
       });
   } else {
     res.statusCode(400);
@@ -56,23 +39,24 @@ exports.get = function(req, res) {
 
 exports.getAppointment = function(req, res) {
 
-  Appointments.find({where: {uuid: req.params.uuid}, attributes: attr})
-    .complete(function(err, user) {
-      res.json(user);
+  Model.find({where: {_id: req.params.id}, attributes: attr})
+    .then(function(response) {
+      res.json(response);
+    })
+    .catch(function(reason) {
+      res.json(reason);
     });
 };
 
 exports.create = function(req, res) {
-  req.body.uuid = utility.uuidGenerator();
-  var Instance = Appointments.build(req.body);
-
-
+  req.body._id = utility.uuidGenerator();
+  var Instance = Model.build(req.body);
   var promises = [
     Instance.validate()
   ];
-  Q.all(promises)
+  $q.all(promises)
     .then(function(response) {
-      var otherValidation = utility.formatErrors(response[2]);
+      var otherValidation = utility.formatErrors(response[0]);
 
       otherValidation = utility.appendMultipleErrors(otherValidation);
       if (Object.keys(otherValidation).length) {
@@ -80,13 +64,12 @@ exports.create = function(req, res) {
         res.json(otherValidation);
       } else {
         Instance.save()
-          .complete(function(err, user) {
-            if (err) {
-              res.status(400);
-              res.json({systemError: err});
-            } else {
-              res.json(user);
-            }
+          .then(function(response) {
+            res.json(response);
+          })
+          .catch(function() {
+            res.status(400);
+            res.json({systemError: err});
           });
       }
 
@@ -101,8 +84,8 @@ exports.create = function(req, res) {
 };
 
 exports.update = function(req, res) {
-  var userID = parseInt(req.params.uuid);
-  Appointments.find({where: {uuid: userID}, attributes: attr})
+  var userID = req.params.id;
+  Model.find({where: {_id: userID}, attributes: attr})
     .complete(function(err, user) {
 
       if (!err && user) {
@@ -114,11 +97,11 @@ exports.update = function(req, res) {
             }
           });
 
-        var Instance = Appointments.build(existing);
+        var Instance = Model.build(existing);
         var promises = [
           Instance.validate()
         ];
-        Q.all(promises)
+        $q.all(promises)
           .then(function(response) {
 
             var otherValidation = utility.formatErrors(response[5]);
@@ -132,7 +115,7 @@ exports.update = function(req, res) {
                 .complete(function(err, user) {
                   if (err) {
                     res.status(500);
-                    res.json({systemError: err});
+                    res.json({detail: err});
                   } else {
                     res.json(user);
                   }
@@ -142,14 +125,33 @@ exports.update = function(req, res) {
           })
           .fail(function(reason) {
             res.status(500);
-            res.json({q_error: reason});
+            res.json({detail: reason});
           })
           .done();
 
       } else {
         res.status(500);
-        res.json({no_visitor: err});
+        res.json({detail: err});
       }
 
+    });
+};
+
+exports.remove = function(req, res) {
+  var userID = req.params.id;
+  Model.find({where: {_id: userID}})
+    .then(function(user) {
+      user.destroy()
+        .then(function() {
+          res.json({_id: userID});
+        })
+        .catch(function(reason) {
+          res.status(500);
+          res.json(reason);
+        });
+    })
+    .catch(function(reason) {
+      res.status(500);
+      res.json(reason);
     });
 };

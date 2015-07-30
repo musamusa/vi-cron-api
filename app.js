@@ -7,10 +7,10 @@ module.exports = function(app) {
   var bodyParser = require('body-parser');    // pull information from HTML POST (express4)
   var methodOverride = require('method-override'); // simulate DELETE and PUT (express4)
 
-  var utility = require('./utility');
-  var setting = require('./system-manager');
-  var email = require('./email');
-  var sms = require('./beta-sms');
+  var utility = require('./components/utility/index');
+  var setting = require('./components/config-manager/system-manager');
+  var email = require('./components/email/email');
+  var sms = require('./components/sms/beta-sms');
   var cors = require('cors');
   var express  = require('express');
   var path = require('path');
@@ -156,7 +156,7 @@ module.exports = function(app) {
   app.get('/api/database-settings', function(req, res) {
 
     var systemSetting = setting.getSetting();
-    var databaseSettings = {};
+    var databaseSettings = {"host":"localhost","dbName":"viLogged","user":"root","dbType":"sqlite"};
 
     if (systemSetting.databaseSettings) {
       databaseSettings = systemSetting.databaseSettings;
